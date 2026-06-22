@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chesley Andrews</title>
+  <meta name="description" content="Chesley Andrews — designer, community builder, and founder." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blush: #F2EAE6;
+      --blush-hover: #EDE0C8;
+      --ink: #2C2520;
+      --muted: #8C7B72;
+      --accent: #B5715A;
+      --accent-dark: #7A3E28;
+    }
+
+    body {
+      background-color: var(--blush);
+      color: var(--ink);
+      font-family: 'Lora', Georgia, serif;
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.75;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 3rem 1.5rem;
+      transition: background-color 0.4s ease;
+    }
+
+    body:has(a:hover) {
+      background-color: var(--blush-hover);
+    }
+
+    main {
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .hello {
+      font-size: 1rem;
+      margin-bottom: 1.1rem;
+      color: var(--ink);
+    }
+
+    .bio {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--ink);
+      margin-bottom: 1.4rem;
+    }
+
+    .bio a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: rgba(181,113,90,0.5);
+      transition: color 0.2s;
+    }
+
+    .bio a:hover {
+      color: var(--accent-dark);
+      text-decoration-color: var(--accent-dark);
+    }
+
+    .available {
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 1.6rem;
+    }
+
+    .contact-label {
+      font-size: 0.9rem;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 1.25rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      font-size: 0.9rem;
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: rgba(181,113,90,0.5);
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--accent-dark);
+      text-decoration-color: var(--accent-dark);
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 2.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="hello">Hello!</p>
+    <p class="bio">
+      I'm Chesley, currently a Senior Product Design Director at <a href="https://www.betterment.com/" target="_blank" rel="noopener">Betterment</a>.
+      In the past I was a designer at <a href="https://www.etsy.com/" target="_blank" rel="noopener">Etsy</a>,
+      <a href="https://athleticsnyc.com/" target="_blank" rel="noopener">Athletics</a>,
+      and ran my own design studio.
+    </p>
+    <p class="available">I am available for select graphic design projects.</p>
+    <p class="contact-label">Get in touch:</p>
+    <nav>
+      <a href="mailto:Chesley.andrews@gmail.com">Email</a>
+      <a href="https://www.linkedin.com/in/chesley-andrews" target="_blank" rel="noopener">LinkedIn</a>
+    </nav>
+  </main>
+</body>
+</html>
