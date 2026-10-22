@@ -144,8 +144,8 @@ const CONFIG = {
   address:   "84 Old Post Rd, Bedford Corners, NY 10549",   // shown after the password only
   rsvpBy:    "2027-02-05",
   hero:      "invite.png",        // your graphic, same folder; "" to hide
-  photosTitle: "Last time",
-  photos:    [],                  // e.g. ["photos/01.jpg","photos/02.jpg"]
+  photosTitle: "Snagged at the swap",
+  photos:    ["01","02","03","04","05","06","07","08"].map(n=>`photos/${n}.svg`),  // swap for real photos later, e.g. "photos/01.jpg"
   api:       "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec"
 };
 /* ========================================================== */
@@ -292,4 +292,3 @@ if (PW) enter(PW).then(ok=>{ if(!ok){ store.del("pw"); show("gate"); } }).catch(
 </script>
 </body>
 </html>
-
