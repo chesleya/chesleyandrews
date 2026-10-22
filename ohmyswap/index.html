@@ -65,13 +65,6 @@
   .chip{padding:10px 0;border-bottom:1px solid rgba(31,42,133,.15)}
   .chip:last-child{border-bottom:none}
   .chip.me{font-weight:700}
-  .chip .plus{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
-  #friendWrap{margin-top:18px;padding-top:16px;border-top:1px solid rgba(31,42,133,.15)}
-  label.check{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;margin:0;cursor:pointer}
-  label.check input{width:20px;height:20px;accent-color:var(--ink);margin:0}
-  #friendRow{display:flex;gap:8px;margin-top:12px}
-  #friendRow input{flex:1;min-width:0}
-  #friendRow button{flex:0 0 auto}
   #matches{margin-top:6px;border-radius:8px;overflow:hidden}
   #matches button{display:block;width:100%;text-align:left;border:none;border-radius:0;border-bottom:1px solid rgba(31,42,133,.15);background:#fdf3f0;padding:13px 14px;font-weight:500}
   #matches button:last-child{border-bottom:none}
@@ -139,15 +132,6 @@
         <button class="choice" data-s="no" aria-pressed="false">Next time</button>
       </div>
       <p class="note" style="margin-top:12px" id="notMeLine"><button class="linkish" id="notMe">Not <span id="me2"></span>?</button></p>
-      <div class="note" id="myReply" style="margin-top:10px"></div>
-      <div id="friendWrap" class="hidden">
-        <label class="check"><input type="checkbox" id="bringFriend"> Bringing a friend</label>
-        <div id="friendRow" class="hidden">
-          <input id="friendName" type="text" placeholder="Friend's full name" autocomplete="off" autocapitalize="words" maxlength="60" enterkeyhint="done">
-          <button id="saveFriend" type="button">Save</button>
-        </div>
-        <div class="note" id="friendNote"></div>
-      </div>
       <div class="err" id="rsvpErr"></div>
       <div class="cal">
         <a class="btn" id="gcal" target="_blank" rel="noopener">Add to Google Calendar</a>
@@ -265,24 +249,19 @@ async function save(status, friend){
   GUESTS = res.guests; renderInvite(); return true;
 }
 const myGuest = () => GUESTS.find(g=>g.name===ME) || {};
-$("#bringFriend").onchange = async () => {
-  const on = $("#bringFriend").checked;
-  $("#friendRow").classList.toggle("hidden", !on);
-  if (on) { $("#friendName").focus(); }
-  else if (myGuest().friend) { await save(myGuest().status, ""); }
-};
-$("#saveFriend").onclick = async () => {
-  const f = $("#friendName").value.trim();
-  if (!f){ $("#friendNote").textContent = "Add her name, then save."; return; }
-  if (await save(myGuest().status, f)) $("#friendNote").textContent = "Saved.";
-};
-$("#friendName").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("#saveFriend").click(); } });
+// A reply counts only if the press began on that same button.
+// iOS "ghost" clicks after the name list closes have no press of their own on the button, so they're ignored.
+let PRESSED = null;
+$("#choices").addEventListener("pointerdown", e => { PRESSED = e.target.closest(".choice"); });
+document.addEventListener("pointerdown", e => { if (!e.target.closest("#choices")) PRESSED = null; }, true);
 $("#choices").onclick = async e => {
   const b = e.target.closest(".choice"); if (!b) return;
+  if (PRESSED !== b) return;
+  PRESSED = null;
   if (Date.now() - PICKED_AT < 800) return;
   $("#rsvpErr").textContent = "";
   if (!ME){ $("#rsvpErr").textContent = "Pick your name first, then reply."; $("#name").focus(); return; }
-  await save(b.dataset.s, b.dataset.s === "no" ? "" : (myGuest().friend || ""));
+  await save(b.dataset.s, "");
 };
 
 /* ---------- Render ---------- */
@@ -311,15 +290,6 @@ function renderInvite(){
 
   const mine = (GUESTS.find(g=>g.name===ME)||{}).status || "";
   document.querySelectorAll(".choice").forEach(b=>b.setAttribute("aria-pressed", b.dataset.s===mine));
-  const labels = {yes:"I'll be there", maybe:"Maybe", no:"Next time"};
-  $("#myReply").textContent = ME && mine ? `You replied: ${labels[mine]}. Tap another to change it.` : "";
-  const fr = (GUESTS.find(g=>g.name===ME)||{}).friend || "";
-  $("#friendWrap").classList.toggle("hidden", !(ME && (mine==="yes" || mine==="maybe")));
-  if (document.activeElement !== $("#friendName")) {
-    $("#bringFriend").checked = !!fr; $("#friendRow").classList.toggle("hidden", !fr);
-    $("#friendName").value = fr;
-  }
-  $("#friendNote").textContent = "";
 
   $("#gcal").href = gcalLink();
 
@@ -341,12 +311,10 @@ function renderInvite(){
   for (const [s,label] of groups){
     const list = GUESTS.filter(g=>(g.status||"")===s).sort((a,b)=>a.name.localeCompare(b.name));
     if (!list.length) continue;
-    const heads = list.length + list.filter(g=>g.friend && s!=="no" && s!=="").length;
     const g = document.createElement("div"); g.className = "group";
-    const h = document.createElement("div"); h.className = "label"; h.textContent = `${label} · ${heads}`;
+    const h = document.createElement("div"); h.className = "label"; h.textContent = `${label} · ${list.length}`;
     const n = document.createElement("div"); n.className = "names";
     list.forEach(x=>{ const c = document.createElement("span"); c.className = "chip" + (x.name===ME?" me":""); c.textContent = x.name;
-      if (x.friend && (s==="yes"||s==="maybe")){ const p = document.createElement("span"); p.className = "plus"; p.textContent = "+ " + x.friend; c.appendChild(p); }
       n.appendChild(c); });
     g.append(h,n); box.appendChild(g);
   }
