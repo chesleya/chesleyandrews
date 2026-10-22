@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light">
+<title>Host · Sip &amp; Swap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#f7d9d1; --ink:#1f2a85; --muted:#5b5f93; --line:#1f2a85; --soft:rgba(31,42,133,.15); --accent:#d9412b; }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:16px/1.5 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 120px}
+  h1{font-family:"Libre Caslon Display",Georgia,serif;font-weight:400;font-size:clamp(40px,12vw,72px);line-height:1;margin:12px 0 6px;letter-spacing:-.02em}
+  h2{font-size:21px;font-weight:600;margin:0 0 14px}
+  .sub{color:var(--muted);margin:0}
+  section{border-top:1px solid var(--line);margin-top:32px;padding-top:24px}
+  label{display:block;font-size:14px;font-weight:600;margin:16px 0 6px}
+  label:first-of-type{margin-top:0}
+  .hint{font-weight:400;color:var(--muted)}
+  input,textarea{width:100%;font:inherit;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+  textarea{min-height:240px;resize:vertical;line-height:1.6}
+  input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .two label{margin-top:16px}
+  button{font:inherit;font-weight:600;cursor:pointer;border-radius:999px;padding:13px 20px;border:1px solid var(--ink);background:transparent;color:var(--ink)}
+  .primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .wide{width:100%}
+  .linkish{background:none;border:none;padding:0;font-weight:600;font-size:14px;color:var(--ink)}
+  .danger{border-color:var(--accent);color:var(--accent)}
+  .err{color:var(--accent);font-size:14px;min-height:1.4em;margin-top:8px}
+  .toggle{display:flex;align-items:center;gap:12px;font-weight:600;margin:0}
+  .toggle input{width:22px;height:22px;accent-color:var(--ink);margin:0}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+  .stat{border:1px solid var(--soft);border-radius:10px;padding:10px 8px;text-align:center}
+  .stat b{display:block;font-size:24px;line-height:1.1}
+  .stat span{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+  .group{margin-top:20px}
+  .label{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700;margin-bottom:6px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+  .row .when{color:var(--muted);font-size:14px;white-space:nowrap}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .bar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  .bar .status{flex:1;font-size:14px;color:var(--muted)}
+  .hidden{display:none!important}
+  @media (max-width:420px){ .stats{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Sign in -->
+  <section id="gate" style="border-top:none;margin-top:0;padding-top:0">
+    <h1>Host</h1>
+    <p class="sub">Sip &amp; Swap</p>
+    <form id="hostForm" style="margin-top:24px">
+      <label for="hostPw">Host password</label>
+      <input id="hostPw" type="password" autocomplete="current-password" required>
+      <div class="err" id="hostErr"></div>
+      <button class="primary wide" type="submit">Submit</button>
+    </form>
+  </section>
+
+  <div id="app" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <h1>Host</h1>
+      <button class="linkish" id="signOut" type="button">Sign out</button>
+    </div>
+    <p class="sub"><a href="../" style="color:inherit;text-decoration:none;font-weight:600">View the invite →</a></p>
+
+    <section>
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h2>Replies</h2>
+        <button class="linkish" id="refresh" type="button">Refresh</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div id="replies"></div>
+    </section>
+
+    <section>
+      <h2>Details</h2>
+      <label for="date">Date</label>
+      <input id="date" type="date">
+      <div class="two">
+        <div><label for="start">Starts</label><input id="start" type="time"></div>
+        <div><label for="end">Ends <span class="hint">(for calendars)</span></label><input id="end" type="time"></div>
+      </div>
+      <label for="location">Place</label>
+      <input id="location" type="text" placeholder="Chesley's house">
+      <label for="address">Address</label>
+      <input id="address" type="text" placeholder="Street, Town, ST 00000">
+    </section>
+
+    <section>
+      <h2>Guests</h2>
+      <label for="guests">One full name per line <span class="hint" id="guestCount"></span></label>
+      <textarea id="guests" spellcheck="false" autocapitalize="words"></textarea>
+      <p class="sub" style="font-size:14px;margin-top:8px">Renaming someone clears their reply.</p>
+    </section>
+
+    <section>
+      <h2>Guest password</h2>
+      <label for="guestPw">What guests type to get in</label>
+      <input id="guestPw" type="text" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p class="sub" style="font-size:14px;margin-top:8px">Changing it locks out anyone using the old one, including guests who already have the page open.</p>
+    </section>
+
+    <section>
+      <h2>Next party</h2>
+      <p class="sub" style="margin-bottom:14px">Clears every reply. Guests and details stay.</p>
+      <button class="danger" id="reset" type="button">Clear all replies</button>
+    </section>
+  </div>
+</div>
+
+<div class="bar hidden" id="bar">
+  <div class="in">
+    <div class="status" id="saveStatus">All saved</div>
+    <button class="primary" id="save" type="button">Save changes</button>
+  </div>
+</div>
+
+<script>
+/* Same URL as the invite page's CONFIG.api */
+const API = "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec";
+
+const $ = s => document.querySelector(s);
+const DEMO = !/^https:\/\/script\.google\.com\//.test(API);
+const store = {
+  get:k=>{try{return localStorage.getItem("sns_"+k)}catch(e){return null}},
+  set:(k,v)=>{try{localStorage.setItem("sns_"+k,v)}catch(e){}},
+  del:k=>{try{localStorage.removeItem("sns_"+k)}catch(e){}}
+};
+let HOST = store.get("host") || "", S = null, DIRTY = false;
+
+/* ---------- API ---------- */
+const demo = { settings:{password:"sample-pass",event:{date:"2030-01-04",start:"18:00",end:"20:00",timeZone:"America/New_York",location:"Sample house",address:"1 Sample Lane, Anytown, NY 10000"},guests:["Ann Lee","Bo Diaz","Cara Fox","Dee Moss","Eve Hart"]},
+  rsvps:{"Ann Lee":{status:"yes",at:new Date(Date.now()-3600e3).toISOString()},"Bo Diaz":{status:"maybe",at:new Date(Date.now()-86400e3*2).toISOString()},"Dee Moss":{status:"no",at:new Date(Date.now()-600e3).toISOString()}} };
+async function api(body){
+  if (DEMO){
+    if (body.host !== "demo") return {error:"bad_password"};
+    if (body.action==="host_save") demo.settings = JSON.parse(JSON.stringify(body.settings));
+    if (body.action==="host_reset") demo.rsvps = {};
+    return {settings:demo.settings, replies:demo.settings.guests.map(n=>({name:n,status:(demo.rsvps[n]||{}).status||"",at:(demo.rsvps[n]||{}).at||""}))};
+  }
+  const r = await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+  return r.json();
+}
+const ERRORS = { short_password:"The guest password needs at least 4 characters.", same_as_host:"Use a guest password that's different from your host password.",
+  bad_date:"Pick a date.", bad_time:"Pick a start and end time.", no_guests:"Add at least one guest.", bad_settings:"Something's off. Reload and try again." };
+
+/* ---------- Sign in ---------- */
+async function open(pw){
+  const res = await api({action:"host_get", host:pw});
+  if (res.error) return false;
+  HOST = pw; store.set("host", pw);
+  load(res); $("#gate").classList.add("hidden"); $("#app").classList.remove("hidden"); $("#bar").classList.remove("hidden");
+  return true;
+}
+$("#hostForm").onsubmit = async e => {
+  e.preventDefault(); $("#hostErr").textContent = "";
+  const ok = await open($("#hostPw").value).catch(()=>null);
+  if (ok === null) $("#hostErr").textContent = "Couldn't connect. Try again in a minute.";
+  else if (!ok) $("#hostErr").textContent = "That's not the host password.";
+};
+$("#signOut").onclick = () => { store.del("host"); location.reload(); };
+
+/* ---------- Render ---------- */
+function load(res){
+  S = res.settings;
+  $("#date").value = S.event.date || ""; $("#start").value = S.event.start || ""; $("#end").value = S.event.end || "";
+  $("#location").value = S.event.location || ""; $("#address").value = S.event.address || "";
+  $("#guests").value = S.guests.join("\n"); $("#guestPw").value = S.password || ""; 
+  countGuests(); renderReplies(res.replies); setDirty(false);
+}
+function ago(iso){
+  if (!iso) return "";
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (m < 1) return "just now"; if (m < 60) return m + "m ago";
+  const h = Math.round(m/60); if (h < 24) return h + "h ago";
+  return new Date(iso).toLocaleDateString("en-US",{month:"short",day:"numeric"});
+}
+function renderReplies(list){
+  const groups = [["yes","Coming"],["maybe","Maybe"],["no","Next time"],["","Haven't replied"]];
+  $("#stats").innerHTML = "";
+  groups.forEach(([s,l])=>{ const d=document.createElement("div"); d.className="stat";
+    const b=document.createElement("b"); b.textContent=list.filter(x=>(x.status||"")===s).length;
+    const sp=document.createElement("span"); sp.textContent=l; d.append(b,sp); $("#stats").appendChild(d); });
+  const box = $("#replies"); box.innerHTML = "";
+  groups.forEach(([s,l])=>{
+    const rows = list.filter(x=>(x.status||"")===s).sort((a,b)=> s ? (b.at||"").localeCompare(a.at||"") : a.name.localeCompare(b.name));
+    if (!rows.length) return;
+    const g=document.createElement("div"); g.className="group";
+    const h=document.createElement("div"); h.className="label"; h.textContent=`${l} (${rows.length})`; g.appendChild(h);
+    rows.forEach(x=>{ const r=document.createElement("div"); r.className="row";
+      const n=document.createElement("span"); n.textContent=x.name;
+      const w=document.createElement("span"); w.className="when"; w.textContent=ago(x.at);
+      r.append(n,w); g.appendChild(r); });
+    box.appendChild(g);
+  });
+}
+function guestList(){ return [...new Set($("#guests").value.split("\n").map(s=>s.trim()).filter(Boolean))]; }
+function countGuests(){ const n = guestList().length; $("#guestCount").textContent = `(${n})`; }
+
+/* ---------- Edit + save ---------- */
+function setDirty(d){ DIRTY = d; $("#saveStatus").textContent = d ? "Unsaved changes" : "All saved"; $("#save").disabled = !d; $("#save").style.opacity = d ? 1 : .5; }
+["date","start","end","location","address","guests","guestPw"].forEach(id=>{
+  $("#"+id).addEventListener("input", ()=>{ setDirty(true); if(id==="guests") countGuests(); });
+  $("#"+id).addEventListener("change", ()=>setDirty(true));
+});
+$("#save").onclick = async () => {
+  const settings = { password:$("#guestPw").value.trim(), guests:guestList(),
+    event:{ date:$("#date").value, start:$("#start").value, end:$("#end").value, timeZone:(S.event.timeZone||"America/New_York"),
+            location:$("#location").value.trim(), address:$("#address").value.trim() } };
+  if (settings.password !== S.password && !confirm("Change the guest password? Anyone using the old one will be locked out until they get the new one.")) return;
+  $("#saveStatus").textContent = "Saving…"; $("#save").disabled = true;
+  const res = await api({action:"host_save", host:HOST, settings}).catch(()=>({error:"net"}));
+  if (res.error){ $("#saveStatus").textContent = ERRORS[res.error] || "Didn't save. Try again."; $("#save").disabled = false; return; }
+  load(res); $("#saveStatus").textContent = "Saved";
+};
+$("#refresh").onclick = async () => {
+  const res = await api({action:"host_get", host:HOST}).catch(()=>null);
+  if (res && !res.error){ if (DIRTY) renderReplies(res.replies); else load(res); }
+};
+$("#reset").onclick = async () => {
+  if (!confirm("Clear every reply? This can't be undone.")) return;
+  const res = await api({action:"host_reset", host:HOST}).catch(()=>({error:"net"}));
+  if (!res.error) renderReplies(res.replies);
+};
+window.addEventListener("beforeunload", e => { if (DIRTY){ e.preventDefault(); e.returnValue = ""; } });
+
+/* ---------- Start ---------- */
+if (DEMO) $("#hostErr").textContent = "Demo mode — the host password is: demo";
+if (HOST) open(HOST).then(ok=>{ if(!ok) store.del("host"); }).catch(()=>{});
+</script>
+</body>
+</html>

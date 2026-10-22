@@ -29,8 +29,8 @@
   .eyebrow,.label{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700}
   .eyebrow{padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:24px}
   .topline{display:flex;justify-content:space-between;gap:12px;text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:28px}
-  .masthead h1,#gate h1{font-size:clamp(88px,27vw,156px);line-height:.88;margin:0 0 22px;letter-spacing:-.02em}
-  .masthead h1 .sip,#gate h1 .sip{font-style:normal;font-size:1em;font-weight:400;letter-spacing:-.02em;margin:0}
+  .masthead h1,#gate h1{font-size:clamp(44px,15.5vw,104px);line-height:1;margin:0 0 22px;letter-spacing:-.02em;white-space:nowrap}
+  .masthead h1 .sip,#gate h1 .sip{display:inline;font-style:normal;font-size:1em;font-weight:400;letter-spacing:-.02em;margin:0}
   .pill{display:inline-block;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:7px 14px}
   .details{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px;font-size:17px;line-height:1.45}
   .details .label{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700;margin-bottom:6px}
@@ -64,7 +64,7 @@
   .group .label{margin-bottom:6px}
   .names{display:flex;flex-direction:column}
   .chip{padding:4px 0}
-  .chip.me{font-weight:700}
+  .chip.me{font-weight:inherit}
   #matches{margin-top:6px;border-radius:8px;overflow:hidden}
   #matches button{display:block;width:100%;text-align:left;border:none;border-radius:0;border-bottom:1px solid rgba(31,42,133,.15);background:#fdf3f0;padding:13px 14px;font-weight:500}
   #matches button:last-child{border-bottom:none}
@@ -91,10 +91,10 @@
 
   <!-- ===== Step 1: password ===== -->
   <section id="gate">
-    <h1 style="margin-top:12px"><span class="sip">Sip <em>&amp;</em></span>Swap</h1>
+    <h1 style="margin-top:12px"><span class="sip">Sip <em>&amp;</em> </span>Swap</h1>
     <div class="card" style="border-top:none;margin-top:24px;padding-top:0">
       <form id="pwForm">
-        <label for="pw">Password <span style="font-weight:400">(in your email)</span></label>
+        <label for="pw">Password <span style="font-weight:400">(from the email)</span></label>
         <input id="pw" type="password" autocomplete="off" required>
         <div class="err" id="pwErr"></div>
         <button class="primary" type="submit">Submit</button>
@@ -106,10 +106,10 @@
   <section id="invite" class="hidden">
     <header class="masthead">
       <div class="topline"><span data-f="eyebrow"></span><span data-f="place"></span></div>
-      <h1><span class="sip">Sip <em>&amp;</em></span>Swap</h1>
+      <h1><span class="sip">Sip <em>&amp;</em> </span>Swap</h1>
       <div class="details">
         <div><div class="label">When</div><div id="when"></div></div>
-        <div><div class="label">Where</div><div data-f="location"></div><a id="addr" target="_blank" rel="noopener"></a></div>
+        <div><div class="label">Where</div><div id="loc"></div><a id="addr" target="_blank" rel="noopener"></a></div>
       </div>
     </header>
 
@@ -158,12 +158,7 @@ const CONFIG = {
   place:     "",
   title:     "Sip & Swap",
   blurb:     "Women's & children's clothing. Bring what you've stopped wearing. Leave with what you'll start.",
-  date:      "2027-02-12",        // YYYY-MM-DD
-  start:     "18:30",             // 24h, local time
-  end:       "21:00",
-  timeZone:  "America/New_York",
-  location:  "Chesley's house",
-  address:   "84 Old Post Rd, Bedford Corners, NY 10549",   // shown after the password only
+  // Date, time, place and address live in the Google script and arrive only after the password.
   photosTitle: "Snagged at the swap",
   photos:    ["01","02","03","04","05","06","07","08"].map(n=>`photos/${n}.svg`),  // swap for real photos later, e.g. "photos/01.jpg"
   api:       "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec"
@@ -177,7 +172,7 @@ const store = {
   set:(k,v)=>{try{localStorage.setItem("sns_"+k,v)}catch(e){}},
   del:k=>{try{localStorage.removeItem("sns_"+k)}catch(e){}}
 };
-let PW = store.get("pw") || "", ME = store.get("me") || "", GUESTS = [];
+let EV = {}, PW = store.get("pw") || "", ME = store.get("me") || "", GUESTS = [];
 
 /* ---------- API ---------- */
 const demoGuests = ["Alex","Bea","Cass","Dana","Eli","Fran"].map((n,i)=>({name:n,status:["yes","yes","maybe","","no",""][i]}));
@@ -185,7 +180,7 @@ async function api(body){
   if (DEMO){
     if (body.pw !== "demo") return {error:"bad_password"};
     if (body.action === "rsvp"){ const g = demoGuests.find(g=>g.name===body.name); if(g){ g.status = body.status; g.friend = body.status==="no" ? "" : (body.friend ?? g.friend ?? ""); } }
-    return {guests: demoGuests.map(g=>({...g}))};
+    return {guests: demoGuests.map(g=>({...g})), event: {date:"2030-01-04", start:"18:00", end:"20:00", timeZone:"America/New_York", location:"Sample house", address:"1 Sample Lane, Anytown, NY 10000"}};
   }
   const r = await fetch(CONFIG.api, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)});
   return r.json();
@@ -197,7 +192,7 @@ function show(id){ for (const s of ["gate","invite"]) $("#"+s).classList.toggle(
 async function enter(pw){
   const res = await api({action:"list", pw});
   if (res.error) return false;
-  PW = pw; store.set("pw", pw); GUESTS = res.guests;
+  PW = pw; store.set("pw", pw); GUESTS = res.guests; EV = res.event || {};
   if (ME && !GUESTS.some(g=>g.name===ME)){ ME = ""; store.del("me"); }
   renderInvite(); window.scrollTo(0,0);
   return true;
@@ -248,7 +243,7 @@ async function save(status, friend){
   $("#rsvpErr").textContent = "";
   const res = await api({action:"rsvp", pw:PW, name:ME, status, friend}).catch(()=>({error:"net"}));
   if (res.error){ $("#rsvpErr").textContent = "That didn't save. Try again?"; return false; }
-  GUESTS = res.guests; renderInvite(); return true;
+  GUESTS = res.guests; if (res.event) EV = res.event; renderInvite(); return true;
 }
 const myGuest = () => GUESTS.find(g=>g.name===ME) || {};
 // A reply counts only if the press began on that same button.
@@ -270,7 +265,8 @@ $("#choices").onclick = async e => {
 function fill(){ document.querySelectorAll("[data-f]").forEach(el=>el.textContent = CONFIG[el.dataset.f] || ""); document.title = CONFIG.title; }
 
 function fmtWhen(){
-  const s = new Date(`${CONFIG.date}T${CONFIG.start}:00`), e = new Date(`${CONFIG.date}T${CONFIG.end}:00`);
+  if (!EV.date) return "";
+  const s = new Date(`${EV.date}T${EV.start}:00`), e = new Date(`${EV.date}T${EV.end}:00`);
   const d = s.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
   const t = x => x.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}).replace(":00","");
   return `${d}\n${t(s).toLowerCase()}`;
@@ -279,9 +275,10 @@ function fmtWhen(){
 function renderInvite(){
   fill();
   $("#when").textContent = fmtWhen(); $("#when").style.whiteSpace = "pre-line";
-  $("#addr").textContent = CONFIG.address.replace(/, (?=[^,]+, [A-Z]{2})/, ",\n");
+  $("#loc").textContent = EV.location || "";
+  $("#addr").textContent = (EV.address || "").replace(/, (?=[^,]+, [A-Z]{2})/, ",\n");
   $("#addr").style.whiteSpace = "pre-line";
-  $("#addr").href = "https://maps.google.com/?q=" + encodeURIComponent(CONFIG.address);
+  $("#addr").href = "https://maps.google.com/?q=" + encodeURIComponent(EV.address || "");
   const first = ME.split(" ")[0];
   $("#greet").textContent = "RSVP";
   $("#me2").textContent = first;
@@ -325,18 +322,18 @@ function renderInvite(){
 $("#lightbox").onclick = () => $("#lightbox").close();
 
 /* ---------- Calendar ---------- */
-const stamp = t => CONFIG.date.replace(/-/g,"") + "T" + t.replace(":","") + "00";
-function details(){ return `${CONFIG.blurb}\n\nInvite: ${location.href.split("#")[0]}`; }
-function where(){ return [CONFIG.location, CONFIG.address].filter(Boolean).join(", "); }
+const stamp = t => EV.date.replace(/-/g,"") + "T" + t.replace(":","") + "00";
+function details(){ return `Invite: ${location.href.split("#")[0]}`; }
+function where(){ return [EV.location, EV.address].filter(Boolean).join(", "); }
 function gcalLink(){
-  const p = new URLSearchParams({action:"TEMPLATE", text:CONFIG.title, dates:`${stamp(CONFIG.start)}/${stamp(CONFIG.end)}`, ctz:CONFIG.timeZone, details:details(), location:where()});
+  const p = new URLSearchParams({action:"TEMPLATE", text:CONFIG.title, dates:`${stamp(EV.start)}/${stamp(EV.end)}`, ctz:EV.timeZone, details:details(), location:where()});
   return "https://calendar.google.com/calendar/render?" + p;
 }
 $("#ics").onclick = () => {
   const esc = s => s.replace(/[\\,;]/g, m=>"\\"+m).replace(/\n/g,"\\n");
   const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//sipnswap//EN","BEGIN:VEVENT",
-    `UID:${CONFIG.date}-sipnswap@invite`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,"").split(".")[0]}Z`,
-    `DTSTART;TZID=${CONFIG.timeZone}:${stamp(CONFIG.start)}`, `DTEND;TZID=${CONFIG.timeZone}:${stamp(CONFIG.end)}`,
+    `UID:${EV.date}-sipnswap@invite`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,"").split(".")[0]}Z`,
+    `DTSTART;TZID=${EV.timeZone}:${stamp(EV.start)}`, `DTEND;TZID=${EV.timeZone}:${stamp(EV.end)}`,
     `SUMMARY:${esc(CONFIG.title)}`, `LOCATION:${esc(where())}`, `DESCRIPTION:${esc(details())}`,
     "END:VEVENT","END:VCALENDAR"].join("\r\n");
   const a = document.createElement("a");
