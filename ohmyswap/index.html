@@ -50,8 +50,7 @@
   .primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);margin-top:4px}
   .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
   .choice[aria-pressed="true"]{background:var(--ink);color:#fff}
-  #choices{transition:opacity .35s ease}
-  #choices.arming{opacity:0;pointer-events:none}
+  #choices.arming{pointer-events:none}
   .cal{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:20px}
   .linkish{display:inline;background:none;border:none;border-radius:0;padding:0;color:var(--ink);text-decoration:none;font-weight:600;font-size:14px}
   .err{color:var(--accent);font-size:14px;min-height:1.4em;margin-top:8px}
@@ -64,8 +63,7 @@
   .group{margin-top:24px}
   .group .label{margin-bottom:6px}
   .names{display:flex;flex-direction:column}
-  .chip{padding:10px 0;border-bottom:1px solid rgba(31,42,133,.15)}
-  .chip:last-child{border-bottom:none}
+  .chip{padding:4px 0}
   .chip.me{font-weight:700}
   #matches{margin-top:6px;border-radius:8px;overflow:hidden}
   #matches button{display:block;width:100%;text-align:left;border:none;border-radius:0;border-bottom:1px solid rgba(31,42,133,.15);background:#fdf3f0;padding:13px 14px;font-weight:500}
@@ -275,12 +273,12 @@ function fmtWhen(){
   const s = new Date(`${CONFIG.date}T${CONFIG.start}:00`), e = new Date(`${CONFIG.date}T${CONFIG.end}:00`);
   const d = s.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
   const t = x => x.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}).replace(":00","");
-  return `${d} · ${t(s).toLowerCase()}`;
+  return `${d}\n${t(s).toLowerCase()}`;
 }
 
 function renderInvite(){
   fill();
-  $("#when").textContent = fmtWhen();
+  $("#when").textContent = fmtWhen(); $("#when").style.whiteSpace = "pre-line";
   $("#addr").textContent = CONFIG.address.replace(/, (?=[^,]+, [A-Z]{2})/, ",\n");
   $("#addr").style.whiteSpace = "pre-line";
   $("#addr").href = "https://maps.google.com/?q=" + encodeURIComponent(CONFIG.address);
@@ -288,7 +286,6 @@ function renderInvite(){
   $("#greet").textContent = "RSVP";
   $("#me2").textContent = first;
   $("#pickWrap").classList.toggle("hidden", !!ME);
-  $("#choices").classList.toggle("hidden", !ME);
   $("#notListed").classList.toggle("hidden", !!ME);
   $("#notMeLine").classList.toggle("hidden", !ME);
   if (!ME) fillNames();
@@ -317,7 +314,7 @@ function renderInvite(){
     const list = GUESTS.filter(g=>(g.status||"")===s).sort((a,b)=>a.name.localeCompare(b.name));
     if (!list.length) continue;
     const g = document.createElement("div"); g.className = "group";
-    const h = document.createElement("div"); h.className = "label"; h.textContent = `${label} · ${list.length}`;
+    const h = document.createElement("div"); h.className = "label"; h.textContent = `${label} (${list.length})`;
     const n = document.createElement("div"); n.className = "names";
     list.forEach(x=>{ const c = document.createElement("span"); c.className = "chip" + (x.name===ME?" me":""); c.textContent = x.name;
       n.appendChild(c); });
