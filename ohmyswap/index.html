@@ -65,6 +65,13 @@
   .chip{padding:10px 0;border-bottom:1px solid rgba(31,42,133,.15)}
   .chip:last-child{border-bottom:none}
   .chip.me{font-weight:700}
+  .chip .plus{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
+  #friendWrap{margin-top:18px;padding-top:16px;border-top:1px solid rgba(31,42,133,.15)}
+  label.check{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;margin:0;cursor:pointer}
+  label.check input{width:20px;height:20px;accent-color:var(--ink);margin:0}
+  #friendRow{display:flex;gap:8px;margin-top:12px}
+  #friendRow input{flex:1;min-width:0}
+  #friendRow button{flex:0 0 auto}
   #matches{margin-top:6px;border-radius:8px;overflow:hidden}
   #matches button{display:block;width:100%;text-align:left;border:none;border-radius:0;border-bottom:1px solid rgba(31,42,133,.15);background:#fdf3f0;padding:13px 14px;font-weight:500}
   #matches button:last-child{border-bottom:none}
@@ -91,15 +98,13 @@
 
   <!-- ===== Step 1: password ===== -->
   <section id="gate">
-    <div class="topline"><span data-f="eyebrow"></span><span data-f="place"></span></div>
-    <h1><span class="sip">Sip <em>&amp;</em></span>Swap</h1>
-    <p>The password is in your email.</p>
-    <div class="card" style="border-top:none;margin-top:16px;padding-top:0">
+    <h1 style="margin-top:12px"><span class="sip">Sip <em>&amp;</em></span>Swap</h1>
+    <div class="card" style="border-top:none;margin-top:24px;padding-top:0">
       <form id="pwForm">
-        <label for="pw">Password</label>
+        <label for="pw">Password <span style="font-weight:400">(in your email)</span></label>
         <input id="pw" type="password" autocomplete="off" required>
         <div class="err" id="pwErr"></div>
-        <button class="primary" type="submit">Let me in</button>
+        <button class="primary" type="submit">Submit</button>
       </form>
     </div>
   </section>
@@ -133,12 +138,21 @@
         <button class="choice" data-s="maybe" aria-pressed="false">Maybe</button>
         <button class="choice" data-s="no" aria-pressed="false">Next time</button>
       </div>
+      <p class="note" style="margin-top:12px" id="notMeLine"><button class="linkish" id="notMe">Not <span id="me2"></span>?</button></p>
+      <div class="note" id="myReply" style="margin-top:10px"></div>
+      <div id="friendWrap" class="hidden">
+        <label class="check"><input type="checkbox" id="bringFriend"> Bringing a friend</label>
+        <div id="friendRow" class="hidden">
+          <input id="friendName" type="text" placeholder="Friend's full name" autocomplete="off" autocapitalize="words" maxlength="60" enterkeyhint="done">
+          <button id="saveFriend" type="button">Save</button>
+        </div>
+        <div class="note" id="friendNote"></div>
+      </div>
       <div class="err" id="rsvpErr"></div>
       <div class="cal">
         <a class="btn" id="gcal" target="_blank" rel="noopener">Add to Google Calendar</a>
         <button class="linkish" id="ics">or Apple Calendar</button>
       </div>
-      <p class="note" id="notMeLine"><button class="linkish" id="notMe">Not <span id="me2"></span>?</button></p>
       <p class="note muted" id="notListed">Not on the list? Reply to the email and we'll sort it out.</p>
     </div>
 
@@ -186,7 +200,7 @@ const demoGuests = ["Alex","Bea","Cass","Dana","Eli","Fran"].map((n,i)=>({name:n
 async function api(body){
   if (DEMO){
     if (body.pw !== "demo") return {error:"bad_password"};
-    if (body.action === "rsvp"){ const g = demoGuests.find(g=>g.name===body.name); if(g) g.status = body.status; }
+    if (body.action === "rsvp"){ const g = demoGuests.find(g=>g.name===body.name); if(g){ g.status = body.status; g.friend = body.status==="no" ? "" : (body.friend ?? g.friend ?? ""); } }
     return {guests: demoGuests.map(g=>({...g}))};
   }
   const r = await fetch(CONFIG.api, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)});
@@ -207,7 +221,10 @@ async function enter(pw){
 
 function fillNames(){ $("#name").value = ""; $("#matches").innerHTML = ""; }
 
+let PICKED_AT = 0;
 function choose(name){
+  PICKED_AT = Date.now();
+  $("#name").blur();
   ME = name; store.set("me", ME); $("#rsvpErr").textContent = ""; renderInvite();
 }
 function findMatches(q){
@@ -220,7 +237,11 @@ $("#name").addEventListener("input", () => {
   const q = $("#name").value; if (!q.trim()) return;
   const m = findMatches(q);
   if (!m.length){ const d = document.createElement("div"); d.className = "none"; d.textContent = "No match yet. Try your first name."; box.appendChild(d); return; }
-  m.forEach(n=>{ const b = document.createElement("button"); b.type = "button"; b.textContent = n; b.onclick = ()=>choose(n); box.appendChild(b); });
+  m.forEach(n=>{ const b = document.createElement("button"); b.type = "button"; b.textContent = n;
+    // touchend + preventDefault swallows the follow-up click, so the tap can't land on a reply button after the list closes
+    b.addEventListener("touchend", e => { e.preventDefault(); choose(n); });
+    b.onclick = () => choose(n);
+    box.appendChild(b); });
 });
 $("#name").addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
@@ -237,13 +258,31 @@ $("#pwForm").onsubmit = async e => {
 
 $("#notMe").onclick = () => { ME = ""; store.del("me"); renderInvite(); $("#name").focus(); };
 
+async function save(status, friend){
+  $("#rsvpErr").textContent = "";
+  const res = await api({action:"rsvp", pw:PW, name:ME, status, friend}).catch(()=>({error:"net"}));
+  if (res.error){ $("#rsvpErr").textContent = "That didn't save. Try again?"; return false; }
+  GUESTS = res.guests; renderInvite(); return true;
+}
+const myGuest = () => GUESTS.find(g=>g.name===ME) || {};
+$("#bringFriend").onchange = async () => {
+  const on = $("#bringFriend").checked;
+  $("#friendRow").classList.toggle("hidden", !on);
+  if (on) { $("#friendName").focus(); }
+  else if (myGuest().friend) { await save(myGuest().status, ""); }
+};
+$("#saveFriend").onclick = async () => {
+  const f = $("#friendName").value.trim();
+  if (!f){ $("#friendNote").textContent = "Add her name, then save."; return; }
+  if (await save(myGuest().status, f)) $("#friendNote").textContent = "Saved.";
+};
+$("#friendName").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("#saveFriend").click(); } });
 $("#choices").onclick = async e => {
   const b = e.target.closest(".choice"); if (!b) return;
+  if (Date.now() - PICKED_AT < 800) return;
   $("#rsvpErr").textContent = "";
   if (!ME){ $("#rsvpErr").textContent = "Pick your name first, then reply."; $("#name").focus(); return; }
-  const res = await api({action:"rsvp", pw:PW, name:ME, status:b.dataset.s}).catch(()=>({error:"net"}));
-  if (res.error){ $("#rsvpErr").textContent = "That didn't save. Try again?"; return; }
-  GUESTS = res.guests; renderInvite();
+  await save(b.dataset.s, b.dataset.s === "no" ? "" : (myGuest().friend || ""));
 };
 
 /* ---------- Render ---------- */
@@ -272,6 +311,15 @@ function renderInvite(){
 
   const mine = (GUESTS.find(g=>g.name===ME)||{}).status || "";
   document.querySelectorAll(".choice").forEach(b=>b.setAttribute("aria-pressed", b.dataset.s===mine));
+  const labels = {yes:"I'll be there", maybe:"Maybe", no:"Next time"};
+  $("#myReply").textContent = ME && mine ? `You replied: ${labels[mine]}. Tap another to change it.` : "";
+  const fr = (GUESTS.find(g=>g.name===ME)||{}).friend || "";
+  $("#friendWrap").classList.toggle("hidden", !(ME && (mine==="yes" || mine==="maybe")));
+  if (document.activeElement !== $("#friendName")) {
+    $("#bringFriend").checked = !!fr; $("#friendRow").classList.toggle("hidden", !fr);
+    $("#friendName").value = fr;
+  }
+  $("#friendNote").textContent = "";
 
   $("#gcal").href = gcalLink();
 
@@ -291,12 +339,15 @@ function renderInvite(){
   const groups = [["yes","Coming"],["maybe","Maybe"],["","Haven't replied"],["no","Next time"]];
   const box = $("#groups"); box.innerHTML = "";
   for (const [s,label] of groups){
-    const list = GUESTS.filter(g=>(g.status||"")===s).map(g=>g.name).sort();
+    const list = GUESTS.filter(g=>(g.status||"")===s).sort((a,b)=>a.name.localeCompare(b.name));
     if (!list.length) continue;
+    const heads = list.length + list.filter(g=>g.friend && s!=="no" && s!=="").length;
     const g = document.createElement("div"); g.className = "group";
-    const h = document.createElement("div"); h.className = "label"; h.textContent = `${label} · ${list.length}`;
+    const h = document.createElement("div"); h.className = "label"; h.textContent = `${label} · ${heads}`;
     const n = document.createElement("div"); n.className = "names";
-    list.forEach(name=>{ const c = document.createElement("span"); c.className = "chip" + (name===ME?" me":""); c.textContent = name; n.appendChild(c); });
+    list.forEach(x=>{ const c = document.createElement("span"); c.className = "chip" + (x.name===ME?" me":""); c.textContent = x.name;
+      if (x.friend && (s==="yes"||s==="maybe")){ const p = document.createElement("span"); p.className = "plus"; p.textContent = "+ " + x.friend; c.appendChild(p); }
+      n.appendChild(c); });
     g.append(h,n); box.appendChild(g);
   }
   show("invite");
@@ -325,7 +376,7 @@ $("#ics").onclick = () => {
 
 /* ---------- Start ---------- */
 fill();
-if (DEMO && $("#gate p")) $("#gate p").textContent = "Demo mode — the password is: demo";
+if (DEMO) $("#pwErr").textContent = "Demo mode — the password is: demo";
 if (PW) enter(PW).then(ok=>{ if(!ok){ store.del("pw"); show("gate"); } }).catch(()=>show("gate"));
 </script>
 </body>
