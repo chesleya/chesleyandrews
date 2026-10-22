@@ -91,7 +91,7 @@
 
   <!-- ===== Step 1: password ===== -->
   <section id="gate">
-    <h1 style="margin-top:12px"><span class="sip">Sip <em>&amp;</em> </span>Swap</h1>
+    <h1 style="margin-top:12px" class="ttl">Sip &amp; Swap</h1>
     <div class="card" style="border-top:none;margin-top:24px;padding-top:0">
       <form id="pwForm">
         <label for="pw">Password <span style="font-weight:400">(from the email)</span></label>
@@ -106,7 +106,7 @@
   <section id="invite" class="hidden">
     <header class="masthead">
       <div class="topline"><span data-f="eyebrow"></span><span data-f="place"></span></div>
-      <h1><span class="sip">Sip <em>&amp;</em> </span>Swap</h1>
+      <h1 class="ttl">Sip &amp; Swap</h1>
       <div class="details">
         <div><div class="label">When</div><div id="when"></div></div>
         <div><div class="label">Where</div><div id="loc"></div><a id="addr" target="_blank" rel="noopener"></a></div>
@@ -172,27 +172,30 @@ const store = {
   set:(k,v)=>{try{localStorage.setItem("sns_"+k,v)}catch(e){}},
   del:k=>{try{localStorage.removeItem("sns_"+k)}catch(e){}}
 };
+let TITLE = store.get("title") || CONFIG.title, SHOW_PHOTOS = false;
 let EV = {}, PW = store.get("pw") || "", ME = store.get("me") || "", GUESTS = [];
 
 /* ---------- API ---------- */
 const demoGuests = ["Alex","Bea","Cass","Dana","Eli","Fran"].map((n,i)=>({name:n,status:["yes","yes","maybe","","no",""][i]}));
 async function api(body){
   if (DEMO){
+    if (body.action === "meta") return {title: CONFIG.title};
     if (body.pw !== "demo") return {error:"bad_password"};
     if (body.action === "rsvp"){ const g = demoGuests.find(g=>g.name===body.name); if(g){ g.status = body.status; g.friend = body.status==="no" ? "" : (body.friend ?? g.friend ?? ""); } }
-    return {guests: demoGuests.map(g=>({...g})), event: {date:"2030-01-04", start:"18:00", end:"20:00", timeZone:"America/New_York", location:"Sample house", address:"1 Sample Lane, Anytown, NY 10000"}};
+    return {guests: demoGuests.map(g=>({...g})), title: CONFIG.title, showPhotos: true, event: {date:"2030-01-04", start:"18:00", end:"20:00", timeZone:"America/New_York", location:"Sample house", address:"1 Sample Lane, Anytown, NY 10000"}};
   }
   const r = await fetch(CONFIG.api, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)});
   return r.json();
 }
 
 /* ---------- Flow ---------- */
-function show(id){ for (const s of ["gate","invite"]) $("#"+s).classList.toggle("hidden", s!==id); }
+function show(id){ for (const s of ["gate","invite"]) $("#"+s).classList.toggle("hidden", s!==id); document.querySelectorAll(".ttl").forEach(fitTitle); }
 
 async function enter(pw){
   const res = await api({action:"list", pw});
   if (res.error) return false;
   PW = pw; store.set("pw", pw); GUESTS = res.guests; EV = res.event || {};
+  SHOW_PHOTOS = !!res.showPhotos; if (res.title) setTitle(res.title);
   if (ME && !GUESTS.some(g=>g.name===ME)){ ME = ""; store.del("me"); }
   renderInvite(); window.scrollTo(0,0);
   return true;
@@ -262,7 +265,20 @@ $("#choices").onclick = async e => {
 };
 
 /* ---------- Render ---------- */
-function fill(){ document.querySelectorAll("[data-f]").forEach(el=>el.textContent = CONFIG[el.dataset.f] || ""); document.title = CONFIG.title; }
+function fill(){ document.querySelectorAll("[data-f]").forEach(el=>el.textContent = CONFIG[el.dataset.f] || ""); setTitle(TITLE); }
+function setTitle(t){
+  TITLE = t; store.set("title", t); document.title = t;
+  document.querySelectorAll(".ttl").forEach(el=>{ el.textContent = t; fitTitle(el); });
+}
+// Keep the title on one line: shrink it until it fits, and only wrap if it's very long.
+function fitTitle(el){
+  if (!el.offsetParent) return;
+  el.style.fontSize = ""; el.style.whiteSpace = "nowrap";
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  while (el.scrollWidth > el.clientWidth && size > 36){ size -= 2; el.style.fontSize = size + "px"; }
+  if (el.scrollWidth > el.clientWidth) el.style.whiteSpace = "normal";
+}
+window.addEventListener("resize", ()=>document.querySelectorAll(".ttl").forEach(fitTitle));
 
 function fmtWhen(){
   if (!EV.date) return "";
@@ -292,7 +308,8 @@ function renderInvite(){
 
   $("#gcal").href = gcalLink();
 
-  if (CONFIG.photos.length){
+  $("#photoCard").classList.toggle("hidden", !(SHOW_PHOTOS && CONFIG.photos.length));
+  if (SHOW_PHOTOS && CONFIG.photos.length){
     $("#photoCard").classList.remove("hidden");
     $("#photos").innerHTML = "";
     CONFIG.photos.forEach(src=>{ const i = new Image(); i.src = src; i.alt = ""; i.loading = "lazy"; i.onclick = ()=>{ $("#lightbox img").src = src; $("#lightbox").showModal(); }; $("#photos").appendChild(i); });
@@ -326,7 +343,7 @@ const stamp = t => EV.date.replace(/-/g,"") + "T" + t.replace(":","") + "00";
 function details(){ return `Invite: ${location.href.split("#")[0]}`; }
 function where(){ return [EV.location, EV.address].filter(Boolean).join(", "); }
 function gcalLink(){
-  const p = new URLSearchParams({action:"TEMPLATE", text:CONFIG.title, dates:`${stamp(EV.start)}/${stamp(EV.end)}`, ctz:EV.timeZone, details:details(), location:where()});
+  const p = new URLSearchParams({action:"TEMPLATE", text:TITLE, dates:`${stamp(EV.start)}/${stamp(EV.end)}`, ctz:EV.timeZone, details:details(), location:where()});
   return "https://calendar.google.com/calendar/render?" + p;
 }
 $("#ics").onclick = () => {
@@ -334,7 +351,7 @@ $("#ics").onclick = () => {
   const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//sipnswap//EN","BEGIN:VEVENT",
     `UID:${EV.date}-sipnswap@invite`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,"").split(".")[0]}Z`,
     `DTSTART;TZID=${EV.timeZone}:${stamp(EV.start)}`, `DTEND;TZID=${EV.timeZone}:${stamp(EV.end)}`,
-    `SUMMARY:${esc(CONFIG.title)}`, `LOCATION:${esc(where())}`, `DESCRIPTION:${esc(details())}`,
+    `SUMMARY:${esc(TITLE)}`, `LOCATION:${esc(where())}`, `DESCRIPTION:${esc(details())}`,
     "END:VEVENT","END:VCALENDAR"].join("\r\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));
@@ -343,6 +360,8 @@ $("#ics").onclick = () => {
 
 /* ---------- Start ---------- */
 fill();
+api({action:"meta"}).then(r=>{ if (r && r.title) setTitle(r.title); }).catch(()=>{});
+if (document.fonts) document.fonts.ready.then(()=>document.querySelectorAll(".ttl").forEach(fitTitle));
 if (DEMO) $("#pwErr").textContent = "Demo mode — the password is: demo";
 if (PW) enter(PW).then(ok=>{ if(!ok){ store.del("pw"); show("gate"); } }).catch(()=>show("gate"));
 </script>
