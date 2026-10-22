@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Sip &amp; Swap</title>
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Matched to the invite graphic: blush, navy, tomato. Light only, like the paper. */
+  :root{
+    --bg:#f7d9d1; --card:#fbebe6; --ink:#1f2a85; --muted:#5b5f93; --line:#e8bdb2;
+    --accent:#d9412b; --accent-ink:#fff; --yes:#1f2a85; --maybe:#d9412b; --no:#a59aa8;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:16px/1.55 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:680px;margin:0 auto;padding:32px 16px 80px}
+  h1,h2,.serif{font-family:"Bodoni Moda",Didot,Georgia,serif;font-weight:700;letter-spacing:-.02em}
+  h1{font-size:clamp(52px,14vw,96px);line-height:.92;margin:0 0 12px}
+  h1 .sip{display:block;font-weight:400;font-style:italic;font-size:.42em;letter-spacing:0;margin-bottom:-.05em}
+  h1 .sip em{color:var(--accent)}
+  h2{font-size:28px;font-weight:400;margin:0 0 12px}
+  h2 em,.accent{color:var(--accent);font-style:italic}
+  .eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:12px;color:var(--ink);font-weight:700;padding-bottom:12px;border-bottom:1px solid var(--ink);margin-bottom:24px}
+  .meta a{color:inherit}
+  .with-hero .hide-if-hero{display:none}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-top:20px}
+  .hero{width:100%;border-radius:var(--radius);display:block;border:1px solid var(--line)}
+  .meta{display:grid;gap:4px;margin:16px 0 0}
+  .meta b{font-weight:600}
+  .muted{color:var(--muted)}
+  label{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
+  input,select{width:100%;font:inherit;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  button,.btn{font:inherit;font-weight:600;cursor:pointer;border-radius:999px;padding:11px 18px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+  .primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .choice{border-color:var(--ink)}
+  .choice[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn,#ics{border-color:var(--line);background:transparent}
+  .card{box-shadow:none}
+  .err{color:var(--accent);font-size:14px;min-height:1.4em;margin-top:8px}
+  .linkish{background:none;border:none;padding:0;color:var(--muted);text-decoration:underline;font-weight:400;font-size:14px}
+  .photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;cursor:zoom-in}
+  .group{margin-top:18px}
+  .group h3{font-size:14px;margin:0 0 8px;display:flex;gap:8px;align-items:center}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .names{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:14px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg)}
+  .chip.me{border-color:var(--ink);font-weight:600}
+  .hidden{display:none!important}
+  dialog{border:none;padding:0;background:transparent;max-width:min(92vw,900px)}
+  dialog::backdrop{background:rgba(0,0,0,.8)}
+  dialog img{max-width:100%;max-height:85vh;border-radius:10px;display:block}
+  .note{font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== Step 1: password ===== -->
+  <section id="gate">
+    <div class="eyebrow" data-f="eyebrow"></div>
+    <h1><span class="sip">Sip <em>&amp;</em></span>Swap</h1>
+    <p>The password is in your email. <span class="accent">No password, no blazer.</span></p>
+    <div class="card">
+      <form id="pwForm">
+        <label for="pw">Password</label>
+        <input id="pw" type="password" autocomplete="off" required>
+        <div class="err" id="pwErr"></div>
+        <button class="primary" type="submit">Let me in</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== Step 2: the invite ===== -->
+  <section id="invite" class="hidden">
+    <img class="hero hidden" id="hero" alt="">
+    <div class="hide-if-hero">
+      <div class="eyebrow" style="margin-top:24px" data-f="eyebrow"></div>
+      <h1 data-f="title"></h1>
+      <p data-f="blurb"></p>
+    </div>
+    <div class="meta" style="margin-top:20px">
+      <div><b id="when"></b></div>
+      <div><span data-f="location"></span> · <a id="addr" target="_blank" rel="noopener"></a></div>
+      <div class="muted" id="rsvpBy"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="greet">Coming?</h2>
+      <div id="pickWrap">
+        <label for="name">First, find your name</label>
+        <select id="name"><option value="">Choose…</option></select>
+      </div>
+      <div class="row" id="choices">
+        <button class="choice" data-s="yes" aria-pressed="false">I'll be there</button>
+        <button class="choice" data-s="maybe" aria-pressed="false">Still deciding</button>
+        <button class="choice" data-s="no" aria-pressed="false">Next time</button>
+      </div>
+      <div class="err" id="rsvpErr"></div>
+      <div class="row">
+        <a class="btn" id="gcal" target="_blank" rel="noopener">Add to Google Calendar</a>
+        <button id="ics">Apple / Outlook</button>
+      </div>
+      <p class="note" id="notMeLine"><button class="linkish" id="notMe">Not <span id="me2"></span>?</button></p>
+      <p class="note muted" id="notListed">Not on the list? Reply to the email and we'll sort it out.</p>
+    </div>
+
+    <div class="card hidden" id="photoCard">
+      <h2 data-f="photosTitle"></h2>
+      <div class="photos" id="photos"></div>
+    </div>
+
+    <div class="card">
+      <h2>Who's <em>coming</em></h2>
+      <p class="muted" id="tally"></p>
+      <div id="groups"></div>
+    </div>
+  </section>
+
+</div>
+<dialog id="lightbox"><img alt=""></dialog>
+
+<script>
+/* ==========================================================
+   EDIT THIS BLOCK FOR EACH PARTY
+   ========================================================== */
+const CONFIG = {
+  eyebrow:   "You're invited",
+  title:     "Sip & Swap",
+  blurb:     "Women's & children's clothing. Bring what you've stopped wearing. Leave with what you'll start.",
+  date:      "2027-02-12",        // YYYY-MM-DD
+  start:     "18:30",             // 24h, local time
+  end:       "21:00",
+  timeZone:  "America/New_York",
+  location:  "Chesley's house",
+  address:   "84 Old Post Rd, Bedford Corners, NY 10549",   // shown after the password only
+  rsvpBy:    "2027-02-05",
+  hero:      "invite.png",        // your graphic, same folder; "" to hide
+  photosTitle: "Last time",
+  photos:    [],                  // e.g. ["photos/01.jpg","photos/02.jpg"]
+  api:       "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec"
+};
+/* ========================================================== */
+
+const $ = s => document.querySelector(s);
+const DEMO = !/^https:\/\/script\.google\.com\//.test(CONFIG.api);
+const store = {
+  get:k=>{try{return localStorage.getItem("sns_"+k)}catch(e){return null}},
+  set:(k,v)=>{try{localStorage.setItem("sns_"+k,v)}catch(e){}},
+  del:k=>{try{localStorage.removeItem("sns_"+k)}catch(e){}}
+};
+let PW = store.get("pw") || "", ME = store.get("me") || "", GUESTS = [];
+
+/* ---------- API ---------- */
+const demoGuests = ["Alex","Bea","Cass","Dana","Eli","Fran"].map((n,i)=>({name:n,status:["yes","yes","maybe","","no",""][i]}));
+async function api(body){
+  if (DEMO){
+    if (body.pw !== "demo") return {error:"bad_password"};
+    if (body.action === "rsvp"){ const g = demoGuests.find(g=>g.name===body.name); if(g) g.status = body.status; }
+    return {guests: demoGuests.map(g=>({...g}))};
+  }
+  const r = await fetch(CONFIG.api, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)});
+  return r.json();
+}
+
+/* ---------- Flow ---------- */
+function show(id){ for (const s of ["gate","invite"]) $("#"+s).classList.toggle("hidden", s!==id); }
+
+async function enter(pw){
+  const res = await api({action:"list", pw});
+  if (res.error) return false;
+  PW = pw; store.set("pw", pw); GUESTS = res.guests;
+  if (ME && !GUESTS.some(g=>g.name===ME)){ ME = ""; store.del("me"); }
+  renderInvite(); window.scrollTo(0,0);
+  return true;
+}
+
+function fillNames(){
+  const sel = $("#name");
+  sel.length = 1;
+  [...GUESTS].sort((a,b)=>a.name.localeCompare(b.name)).forEach(g=>{
+    const o = document.createElement("option"); o.value = o.textContent = g.name; sel.appendChild(o);
+  });
+}
+
+$("#pwForm").onsubmit = async e => {
+  e.preventDefault(); $("#pwErr").textContent = "";
+  const ok = await enter($("#pw").value.trim()).catch(()=>null);
+  if (ok === null) $("#pwErr").textContent = "Couldn't reach the guest list. Try again in a minute.";
+  else if (!ok) $("#pwErr").textContent = "Not quite. Check the email.";
+};
+$("#name").onchange = () => {
+  ME = $("#name").value; if (!ME) return;
+  store.set("me", ME); $("#rsvpErr").textContent = ""; renderInvite();
+};
+$("#notMe").onclick = () => { ME = ""; store.del("me"); renderInvite(); $("#name").focus(); };
+
+$("#choices").onclick = async e => {
+  const b = e.target.closest(".choice"); if (!b) return;
+  $("#rsvpErr").textContent = "";
+  if (!ME){ $("#rsvpErr").textContent = "Pick your name first, then reply."; $("#name").focus(); return; }
+  const res = await api({action:"rsvp", pw:PW, name:ME, status:b.dataset.s}).catch(()=>({error:"net"}));
+  if (res.error){ $("#rsvpErr").textContent = "That didn't save. Try again?"; return; }
+  GUESTS = res.guests; renderInvite();
+};
+
+/* ---------- Render ---------- */
+function fill(){ document.querySelectorAll("[data-f]").forEach(el=>el.textContent = CONFIG[el.dataset.f] || ""); document.title = CONFIG.title; }
+
+function fmtWhen(){
+  const s = new Date(`${CONFIG.date}T${CONFIG.start}:00`), e = new Date(`${CONFIG.date}T${CONFIG.end}:00`);
+  const d = s.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  const t = x => x.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}).replace(":00","");
+  return `${d} · ${t(s)}–${t(e)}`;
+}
+
+function renderInvite(){
+  fill();
+  if (CONFIG.hero){ $("#hero").src = CONFIG.hero; $("#hero").alt = `${CONFIG.title}: ${CONFIG.blurb}`; $("#hero").classList.remove("hidden"); document.body.classList.add("with-hero"); }
+  $("#when").textContent = fmtWhen();
+  $("#addr").textContent = CONFIG.address;
+  $("#addr").href = "https://maps.google.com/?q=" + encodeURIComponent(CONFIG.address);
+  $("#rsvpBy").textContent = CONFIG.rsvpBy ? "Kindly reply by " + new Date(CONFIG.rsvpBy+"T12:00").toLocaleDateString("en-US",{month:"long",day:"numeric"}) : "";
+  const first = ME.split(" ")[0];
+  $("#greet").textContent = ME ? `Hi, ${first}. Coming?` : "Coming?";
+  $("#me2").textContent = first;
+  $("#pickWrap").classList.toggle("hidden", !!ME);
+  $("#notListed").classList.toggle("hidden", !!ME);
+  $("#notMeLine").classList.toggle("hidden", !ME);
+  if (!ME) fillNames();
+
+  const mine = (GUESTS.find(g=>g.name===ME)||{}).status || "";
+  document.querySelectorAll(".choice").forEach(b=>b.setAttribute("aria-pressed", b.dataset.s===mine));
+
+  $("#gcal").href = gcalLink();
+
+  if (CONFIG.photos.length){
+    $("#photoCard").classList.remove("hidden");
+    $("#photos").innerHTML = "";
+    CONFIG.photos.forEach(src=>{ const i = new Image(); i.src = src; i.alt = ""; i.loading = "lazy"; i.onclick = ()=>{ $("#lightbox img").src = src; $("#lightbox").showModal(); }; $("#photos").appendChild(i); });
+  }
+
+  const groups = [["yes","Coming","var(--yes)"],["maybe","Still deciding","var(--maybe)"],["","Haven't replied","var(--line)"],["no","Next time","var(--no)"]];
+  const yes = GUESTS.filter(g=>g.status==="yes").length;
+  $("#tally").textContent = `${yes} coming · ${GUESTS.length} invited`;
+  const box = $("#groups"); box.innerHTML = "";
+  for (const [s,label,color] of groups){
+    const list = GUESTS.filter(g=>(g.status||"")===s).map(g=>g.name).sort();
+    if (!list.length) continue;
+    const g = document.createElement("div"); g.className = "group";
+    const h = document.createElement("h3"); h.innerHTML = `<span class="dot" style="background:${color}"></span>`; h.append(`${label} (${list.length})`);
+    const n = document.createElement("div"); n.className = "names";
+    list.forEach(name=>{ const c = document.createElement("span"); c.className = "chip" + (name===ME?" me":""); c.textContent = name; n.appendChild(c); });
+    g.append(h,n); box.appendChild(g);
+  }
+  show("invite");
+}
+$("#lightbox").onclick = () => $("#lightbox").close();
+
+/* ---------- Calendar ---------- */
+const stamp = t => CONFIG.date.replace(/-/g,"") + "T" + t.replace(":","") + "00";
+function details(){ return `${CONFIG.blurb}\n\nInvite: ${location.href.split("#")[0]}`; }
+function where(){ return [CONFIG.location, CONFIG.address].filter(Boolean).join(", "); }
+function gcalLink(){
+  const p = new URLSearchParams({action:"TEMPLATE", text:CONFIG.title, dates:`${stamp(CONFIG.start)}/${stamp(CONFIG.end)}`, ctz:CONFIG.timeZone, details:details(), location:where()});
+  return "https://calendar.google.com/calendar/render?" + p;
+}
+$("#ics").onclick = () => {
+  const esc = s => s.replace(/[\\,;]/g, m=>"\\"+m).replace(/\n/g,"\\n");
+  const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//sipnswap//EN","BEGIN:VEVENT",
+    `UID:${CONFIG.date}-sipnswap@invite`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g,"").split(".")[0]}Z`,
+    `DTSTART;TZID=${CONFIG.timeZone}:${stamp(CONFIG.start)}`, `DTEND;TZID=${CONFIG.timeZone}:${stamp(CONFIG.end)}`,
+    `SUMMARY:${esc(CONFIG.title)}`, `LOCATION:${esc(where())}`, `DESCRIPTION:${esc(details())}`,
+    "END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));
+  a.download = "sip-n-swap.ics"; a.click();
+};
+
+/* ---------- Start ---------- */
+fill();
+if (DEMO) $("#gate .muted").textContent = "Demo mode — the password is: demo";
+if (PW) enter(PW).then(ok=>{ if(!ok){ store.del("pw"); show("gate"); } }).catch(()=>show("gate"));
+</script>
+</body>
+</html>
