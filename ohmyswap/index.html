@@ -8,58 +8,82 @@
 <meta name="color-scheme" content="light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* Matched to the invite graphic: blush, navy, tomato. Light only, like the paper. */
   :root{
-    --bg:#f7d9d1; --card:#fbebe6; --ink:#1f2a85; --muted:#5b5f93; --line:#e8bdb2;
-    --accent:#d9412b; --accent-ink:#fff; --yes:#1f2a85; --maybe:#d9412b; --no:#a59aa8;
-    --radius:16px;
+    --bg:#f7d9d1; --ink:#1f2a85; --muted:#5b5f93; --line:#1f2a85;
+    --accent:#d9412b; --accent-ink:#fff;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
   body{background:var(--bg);color:var(--ink);font:16px/1.55 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:680px;margin:0 auto;padding:32px 16px 80px}
-  h1,h2,.serif{font-family:"Bodoni Moda",Didot,Georgia,serif;font-weight:700;letter-spacing:-.02em}
-  h1{font-size:clamp(52px,14vw,96px);line-height:.92;margin:0 0 12px}
-  h1 .sip{display:block;font-weight:400;font-style:italic;font-size:.42em;letter-spacing:0;margin-bottom:-.05em}
-  h1 .sip em{color:var(--accent)}
-  h2{font-size:28px;font-weight:400;margin:0 0 12px}
-  h2 em,.accent{color:var(--accent);font-style:italic}
-  .eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:12px;color:var(--ink);font-weight:700;padding-bottom:12px;border-bottom:1px solid var(--ink);margin-bottom:24px}
-  .meta a{color:inherit}
-  .with-hero .hide-if-hero{display:none}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-top:20px}
-  .hero{width:100%;border-radius:var(--radius);display:block;border:1px solid var(--line)}
-  .meta{display:grid;gap:4px;margin:16px 0 0}
+  .wrap{max-width:640px;margin:0 auto;padding:32px 16px 80px}
+  h1{font-family:"Libre Caslon Display",Georgia,serif;font-weight:400;letter-spacing:-.01em}
+  h2{font-family:"DM Sans",system-ui,sans-serif;letter-spacing:-.01em}
+  h1{font-weight:400}
+  h1 .sip{display:block;font-weight:400;font-size:.42em;letter-spacing:0;margin-bottom:-.05em}
+  h1 .sip em{color:inherit;font-style:normal}
+  h2{font-size:22px;font-weight:600;margin:0 0 16px}
+  h2 em{color:var(--accent);font-style:normal}
+  .eyebrow,.label{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700}
+  .eyebrow{padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:24px}
+  .topline{display:flex;justify-content:space-between;gap:12px;text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:28px}
+  .masthead h1,#gate h1{font-size:clamp(88px,27vw,156px);line-height:.88;margin:0 0 22px;letter-spacing:-.02em}
+  .masthead h1 .sip,#gate h1 .sip{font-style:normal;font-size:1em;font-weight:400;letter-spacing:-.02em;margin:0}
+  .pill{display:inline-block;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+  .details{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px;font-size:17px;line-height:1.45}
+  .details .label{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700;margin-bottom:6px}
+  .details a{color:inherit;text-decoration:none}
+  @media (max-width:420px){.details{grid-template-columns:1fr}}
+  .hero{width:100%;border-radius:12px;display:block;cursor:zoom-in}
+  .meta{margin-top:20px}
   .meta b{font-weight:600}
+  .meta a{color:inherit;text-decoration:none}
   .muted{color:var(--muted)}
-  label{display:block;font-size:14px;font-weight:600;margin:14px 0 6px}
-  input,select{width:100%;font:inherit;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+  .card{border-top:1px solid var(--line);margin-top:36px;padding-top:28px}
+  #photoCard h2{font-size:16px;margin-bottom:12px}
+  label{display:block;font-size:14px;font-weight:600;margin:0 0 6px}
+  input,select{width:100%;font:inherit;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink)}
   input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
-  button,.btn{font:inherit;font-weight:600;cursor:pointer;border-radius:999px;padding:11px 18px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
-  .primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
-  .choice{border-color:var(--ink)}
-  .choice[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .btn,#ics{border-color:var(--line);background:transparent}
-  .card{box-shadow:none}
-  #photoCard{background:#fffaf8;border-color:#f1d6cf}
+  button,.btn{font:inherit;font-weight:600;cursor:pointer;border-radius:999px;padding:11px 20px;border:1px solid var(--ink);background:transparent;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center}
+  .primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);margin-top:4px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .choice[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .cal{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:20px}
+  .linkish{display:inline;background:none;border:none;border-radius:0;padding:0;color:var(--ink);text-decoration:none;font-weight:600;font-size:14px}
   .err{color:var(--accent);font-size:14px;min-height:1.4em;margin-top:8px}
-  .linkish{background:none;border:none;padding:0;color:var(--muted);text-decoration:underline;font-weight:400;font-size:14px}
-  .photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-  .photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;cursor:zoom-in}
-  .group{margin-top:18px}
-  .group h3{font-size:14px;margin:0 0 8px;display:flex;gap:8px;align-items:center}
-  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-  .names{display:flex;flex-wrap:wrap;gap:6px}
-  .chip{font-size:14px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg)}
-  .chip.me{border-color:var(--ink);font-weight:600}
+  .photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -16px;padding:0 16px;scroll-padding:0 16px}
+  .photos::-webkit-scrollbar{display:none}
+  .photos img{flex:0 0 auto;height:280px;width:auto;max-width:88vw;object-fit:cover;border-radius:8px;display:block;scroll-snap-align:start;cursor:zoom-in;background:rgba(31,42,133,.06)}
+  .dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
+  .dots span{width:6px;height:6px;border-radius:50%;background:rgba(31,42,133,.25)}
+  .dots span.on{background:var(--ink)}
+  .group{margin-top:24px}
+  .group .label{margin-bottom:6px}
+  .names{display:flex;flex-direction:column}
+  .chip{padding:10px 0;border-bottom:1px solid rgba(31,42,133,.15)}
+  .chip:last-child{border-bottom:none}
+  .chip.me{font-weight:700}
+  #matches{margin-top:6px;border-radius:8px;overflow:hidden}
+  #matches button{display:block;width:100%;text-align:left;border:none;border-radius:0;border-bottom:1px solid rgba(31,42,133,.15);background:#fdf3f0;padding:13px 14px;font-weight:500}
+  #matches button:last-child{border-bottom:none}
+  #matches .none{font-size:14px;color:var(--muted);padding:8px 2px}
   .hidden{display:none!important}
   dialog{border:none;padding:0;background:transparent;max-width:min(92vw,900px)}
   dialog::backdrop{background:rgba(0,0,0,.8)}
   dialog img{max-width:100%;max-height:85vh;border-radius:10px;display:block}
-  .note{font-size:13px;margin-top:10px}
+  .note{font-size:13px;margin-top:16px}
+  @media (max-width:520px){
+    .wrap{padding:20px 16px 64px}
+    .card{margin-top:28px;padding-top:24px}
+    h2{font-size:21px}
+    .photos img{height:240px}
+    #choices{display:grid;grid-template-columns:1fr;gap:8px}
+    #choices button,#gcal,.primary{width:100%;justify-content:center;padding:14px 20px}
+    .cal{flex-direction:column;align-items:stretch;text-align:center}
+    .cal .linkish{align-self:center;padding:6px 0}
+  }
 </style>
 </head>
 <body>
@@ -67,61 +91,59 @@
 
   <!-- ===== Step 1: password ===== -->
   <section id="gate">
-    <div class="eyebrow" data-f="eyebrow"></div>
+    <div class="topline"><span data-f="eyebrow"></span><span data-f="place"></span></div>
     <h1><span class="sip">Sip <em>&amp;</em></span>Swap</h1>
-    <p>The password is in your email </p>
-    <div class="card">
+    <p>The password is in your email.</p>
+    <div class="card" style="border-top:none;margin-top:16px;padding-top:0">
       <form id="pwForm">
         <label for="pw">Password</label>
         <input id="pw" type="password" autocomplete="off" required>
         <div class="err" id="pwErr"></div>
-        <button class="primary" type="submit">Submit</button>
+        <button class="primary" type="submit">Let me in</button>
       </form>
     </div>
   </section>
 
   <!-- ===== Step 2: the invite ===== -->
   <section id="invite" class="hidden">
-    <img class="hero hidden" id="hero" alt="">
-    <div class="hide-if-hero">
-      <div class="eyebrow" style="margin-top:24px" data-f="eyebrow"></div>
-      <h1 data-f="title"></h1>
-      <p data-f="blurb"></p>
-    </div>
-    <div class="meta" style="margin-top:20px">
-      <div><b id="when"></b></div>
-      <div><span data-f="location"></span> · <a id="addr" target="_blank" rel="noopener"></a></div>
-      <div class="muted" id="rsvpBy"></div>
-    </div>
+    <header class="masthead">
+      <div class="topline"><span data-f="eyebrow"></span><span data-f="place"></span></div>
+      <h1><span class="sip">Sip <em>&amp;</em></span>Swap</h1>
+      <div class="details">
+        <div><div class="label">When</div><div id="when"></div></div>
+        <div><div class="label">Where</div><div data-f="location"></div><a id="addr" target="_blank" rel="noopener"></a></div>
+      </div>
+    </header>
 
     <div class="card hidden" id="photoCard">
       <h2 data-f="photosTitle"></h2>
       <div class="photos" id="photos"></div>
+      <div class="dots" id="dots"></div>
     </div>
 
     <div class="card">
-      <h2 id="greet">Coming?</h2>
-      <div id="pickWrap">
-        <label for="name">First, find your name</label>
-        <select id="name"><option value="">Choose…</option></select>
+      <h2 id="greet">RSVP</h2>
+      <div id="pickWrap" style="margin-bottom:4px">
+        <label for="name">Find your name</label>
+        <input id="name" type="text" placeholder="Start typing…" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done">
+        <div id="matches" role="listbox"></div>
       </div>
       <div class="row" id="choices">
         <button class="choice" data-s="yes" aria-pressed="false">I'll be there</button>
-        <button class="choice" data-s="maybe" aria-pressed="false">Still deciding</button>
+        <button class="choice" data-s="maybe" aria-pressed="false">Maybe</button>
         <button class="choice" data-s="no" aria-pressed="false">Next time</button>
       </div>
       <div class="err" id="rsvpErr"></div>
-      <div class="row">
+      <div class="cal">
         <a class="btn" id="gcal" target="_blank" rel="noopener">Add to Google Calendar</a>
-        <button id="ics">Apple / Outlook</button>
+        <button class="linkish" id="ics">or Apple Calendar</button>
       </div>
       <p class="note" id="notMeLine"><button class="linkish" id="notMe">Not <span id="me2"></span>?</button></p>
       <p class="note muted" id="notListed">Not on the list? Reply to the email and we'll sort it out.</p>
     </div>
 
     <div class="card">
-      <h2>Who's <em>coming</em></h2>
-      <p class="muted" id="tally"></p>
+      <h2>Who's coming</h2>
       <div id="groups"></div>
     </div>
   </section>
@@ -135,6 +157,7 @@
    ========================================================== */
 const CONFIG = {
   eyebrow:   "You're invited",
+  place:     "",
   title:     "Sip & Swap",
   blurb:     "Women's & children's clothing. Bring what you've stopped wearing. Leave with what you'll start.",
   date:      "2027-02-12",        // YYYY-MM-DD
@@ -143,8 +166,6 @@ const CONFIG = {
   timeZone:  "America/New_York",
   location:  "Chesley's house",
   address:   "84 Old Post Rd, Bedford Corners, NY 10549",   // shown after the password only
-  rsvpBy:    "",                  // e.g. "2027-02-05"; "" to hide
-  hero:      "invite.png",        // your graphic, same folder; "" to hide
   photosTitle: "Snagged at the swap",
   photos:    ["01","02","03","04","05","06","07","08"].map(n=>`photos/${n}.svg`),  // swap for real photos later, e.g. "photos/01.jpg"
   api:       "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec"
@@ -184,13 +205,28 @@ async function enter(pw){
   return true;
 }
 
-function fillNames(){
-  const sel = $("#name");
-  sel.length = 1;
-  [...GUESTS].sort((a,b)=>a.name.localeCompare(b.name)).forEach(g=>{
-    const o = document.createElement("option"); o.value = o.textContent = g.name; sel.appendChild(o);
-  });
+function fillNames(){ $("#name").value = ""; $("#matches").innerHTML = ""; }
+
+function choose(name){
+  ME = name; store.set("me", ME); $("#rsvpErr").textContent = ""; renderInvite();
 }
+function findMatches(q){
+  q = q.trim().toLowerCase();
+  if (!q) return [];
+  return GUESTS.map(g=>g.name).filter(n => n.toLowerCase().split(/\s+/).some(w=>w.startsWith(q)) || n.toLowerCase().startsWith(q)).sort().slice(0,6);
+}
+$("#name").addEventListener("input", () => {
+  const box = $("#matches"); box.innerHTML = "";
+  const q = $("#name").value; if (!q.trim()) return;
+  const m = findMatches(q);
+  if (!m.length){ const d = document.createElement("div"); d.className = "none"; d.textContent = "No match yet. Try your first name."; box.appendChild(d); return; }
+  m.forEach(n=>{ const b = document.createElement("button"); b.type = "button"; b.textContent = n; b.onclick = ()=>choose(n); box.appendChild(b); });
+});
+$("#name").addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  const m = findMatches($("#name").value); if (m.length === 1) choose(m[0]);
+});
 
 $("#pwForm").onsubmit = async e => {
   e.preventDefault(); $("#pwErr").textContent = "";
@@ -198,10 +234,7 @@ $("#pwForm").onsubmit = async e => {
   if (ok === null) $("#pwErr").textContent = "Couldn't reach the guest list. Try again in a minute.";
   else if (!ok) $("#pwErr").textContent = "Not quite. Check the email.";
 };
-$("#name").onchange = () => {
-  ME = $("#name").value; if (!ME) return;
-  store.set("me", ME); $("#rsvpErr").textContent = ""; renderInvite();
-};
+
 $("#notMe").onclick = () => { ME = ""; store.del("me"); renderInvite(); $("#name").focus(); };
 
 $("#choices").onclick = async e => {
@@ -220,18 +253,17 @@ function fmtWhen(){
   const s = new Date(`${CONFIG.date}T${CONFIG.start}:00`), e = new Date(`${CONFIG.date}T${CONFIG.end}:00`);
   const d = s.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
   const t = x => x.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}).replace(":00","");
-  return `${d} · ${t(s)}–${t(e)}`;
+  return `${d} · ${t(s).toLowerCase()}`;
 }
 
 function renderInvite(){
   fill();
-  if (CONFIG.hero){ $("#hero").src = CONFIG.hero; $("#hero").alt = `${CONFIG.title}: ${CONFIG.blurb}`; $("#hero").classList.remove("hidden"); document.body.classList.add("with-hero"); }
   $("#when").textContent = fmtWhen();
-  $("#addr").textContent = CONFIG.address;
+  $("#addr").textContent = CONFIG.address.replace(/, (?=[^,]+, [A-Z]{2})/, ",\n");
+  $("#addr").style.whiteSpace = "pre-line";
   $("#addr").href = "https://maps.google.com/?q=" + encodeURIComponent(CONFIG.address);
-  $("#rsvpBy").textContent = CONFIG.rsvpBy ? "Kindly reply by " + new Date(CONFIG.rsvpBy+"T12:00").toLocaleDateString("en-US",{month:"long",day:"numeric"}) : "";
   const first = ME.split(" ")[0];
-  $("#greet").textContent = ME ? `Hi, ${first}. Coming?` : "Coming?";
+  $("#greet").textContent = "RSVP";
   $("#me2").textContent = first;
   $("#pickWrap").classList.toggle("hidden", !!ME);
   $("#notListed").classList.toggle("hidden", !!ME);
@@ -247,17 +279,22 @@ function renderInvite(){
     $("#photoCard").classList.remove("hidden");
     $("#photos").innerHTML = "";
     CONFIG.photos.forEach(src=>{ const i = new Image(); i.src = src; i.alt = ""; i.loading = "lazy"; i.onclick = ()=>{ $("#lightbox img").src = src; $("#lightbox").showModal(); }; $("#photos").appendChild(i); });
+    const dots = $("#dots"); dots.innerHTML = "";
+    CONFIG.photos.forEach(()=>dots.appendChild(document.createElement("span")));
+    const mark = () => { const box = $("#photos"), imgs = box.querySelectorAll("img"); if(!imgs.length) return;
+      let i = 0; imgs.forEach((im,k)=>{ if (im.offsetLeft - box.offsetLeft - 16 <= box.scrollLeft + 4) i = k; });
+      if (box.scrollLeft + box.clientWidth >= box.scrollWidth - 4) i = imgs.length - 1;
+      dots.querySelectorAll("span").forEach((d,k)=>d.classList.toggle("on",k===i)); };
+    $("#photos").onscroll = mark; $("#photos").querySelectorAll("img").forEach(im=>im.onload=mark); mark();
   }
 
-  const groups = [["yes","Coming","var(--yes)"],["maybe","Still deciding","var(--maybe)"],["","Haven't replied","var(--line)"],["no","Next time","var(--no)"]];
-  const yes = GUESTS.filter(g=>g.status==="yes").length;
-  $("#tally").textContent = `${yes} coming · ${GUESTS.length} invited`;
+  const groups = [["yes","Coming"],["maybe","Maybe"],["","Haven't replied"],["no","Next time"]];
   const box = $("#groups"); box.innerHTML = "";
-  for (const [s,label,color] of groups){
+  for (const [s,label] of groups){
     const list = GUESTS.filter(g=>(g.status||"")===s).map(g=>g.name).sort();
     if (!list.length) continue;
     const g = document.createElement("div"); g.className = "group";
-    const h = document.createElement("h3"); h.innerHTML = `<span class="dot" style="background:${color}"></span>`; h.append(`${label} (${list.length})`);
+    const h = document.createElement("div"); h.className = "label"; h.textContent = `${label} · ${list.length}`;
     const n = document.createElement("div"); n.className = "names";
     list.forEach(name=>{ const c = document.createElement("span"); c.className = "chip" + (name===ME?" me":""); c.textContent = name; n.appendChild(c); });
     g.append(h,n); box.appendChild(g);
@@ -288,7 +325,7 @@ $("#ics").onclick = () => {
 
 /* ---------- Start ---------- */
 fill();
-if (DEMO) $("#gate .muted").textContent = "Demo mode — the password is: demo";
+if (DEMO && $("#gate p")) $("#gate p").textContent = "Demo mode — the password is: demo";
 if (PW) enter(PW).then(ok=>{ if(!ok){ store.del("pw"); show("gate"); } }).catch(()=>show("gate"));
 </script>
 </body>
