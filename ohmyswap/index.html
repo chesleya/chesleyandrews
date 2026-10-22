@@ -50,6 +50,8 @@
   .primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);margin-top:4px}
   .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
   .choice[aria-pressed="true"]{background:var(--ink);color:#fff}
+  #choices{transition:opacity .35s ease}
+  #choices.arming{opacity:0;pointer-events:none}
   .cal{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:20px}
   .linkish{display:inline;background:none;border:none;border-radius:0;padding:0;color:var(--ink);text-decoration:none;font-weight:600;font-size:14px}
   .err{color:var(--accent);font-size:14px;min-height:1.4em;margin-top:8px}
@@ -208,6 +210,8 @@ function fillNames(){ $("#name").value = ""; $("#matches").innerHTML = ""; }
 let PICKED_AT = 0;
 function choose(name){
   PICKED_AT = Date.now();
+  const c = $("#choices"); c.classList.add("arming");
+  setTimeout(()=>c.classList.remove("arming"), 700);
   $("#name").blur();
   ME = name; store.set("me", ME); $("#rsvpErr").textContent = ""; renderInvite();
 }
@@ -284,6 +288,7 @@ function renderInvite(){
   $("#greet").textContent = "RSVP";
   $("#me2").textContent = first;
   $("#pickWrap").classList.toggle("hidden", !!ME);
+  $("#choices").classList.toggle("hidden", !ME);
   $("#notListed").classList.toggle("hidden", !!ME);
   $("#notMeLine").classList.toggle("hidden", !ME);
   if (!ME) fillNames();
