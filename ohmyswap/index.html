@@ -44,6 +44,7 @@
   .choice[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
   .btn,#ics{border-color:var(--line);background:transparent}
   .card{box-shadow:none}
+  #photoCard{background:#fffaf8;border-color:#f1d6cf}
   .err{color:var(--accent);font-size:14px;min-height:1.4em;margin-top:8px}
   .linkish{background:none;border:none;padding:0;color:var(--muted);text-decoration:underline;font-weight:400;font-size:14px}
   .photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
@@ -93,6 +94,11 @@
       <div class="muted" id="rsvpBy"></div>
     </div>
 
+    <div class="card hidden" id="photoCard">
+      <h2 data-f="photosTitle"></h2>
+      <div class="photos" id="photos"></div>
+    </div>
+
     <div class="card">
       <h2 id="greet">Coming?</h2>
       <div id="pickWrap">
@@ -111,11 +117,6 @@
       </div>
       <p class="note" id="notMeLine"><button class="linkish" id="notMe">Not <span id="me2"></span>?</button></p>
       <p class="note muted" id="notListed">Not on the list? Reply to the email and we'll sort it out.</p>
-    </div>
-
-    <div class="card hidden" id="photoCard">
-      <h2 data-f="photosTitle"></h2>
-      <div class="photos" id="photos"></div>
     </div>
 
     <div class="card">
@@ -142,7 +143,7 @@ const CONFIG = {
   timeZone:  "America/New_York",
   location:  "Chesley's house",
   address:   "84 Old Post Rd, Bedford Corners, NY 10549",   // shown after the password only
-  rsvpBy:    "2027-02-05",
+  rsvpBy:    "",                  // e.g. "2027-02-05"; "" to hide
   hero:      "invite.png",        // your graphic, same folder; "" to hide
   photosTitle: "Snagged at the swap",
   photos:    ["01","02","03","04","05","06","07","08"].map(n=>`photos/${n}.svg`),  // swap for real photos later, e.g. "photos/01.jpg"
