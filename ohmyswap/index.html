@@ -59,6 +59,8 @@
   .photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -16px;padding:0 16px;scroll-padding:0 16px}
   .photos::-webkit-scrollbar{display:none}
   .photos img{flex:0 0 auto;height:280px;width:auto;max-width:88vw;object-fit:cover;border-radius:8px;display:block;scroll-snap-align:start;cursor:zoom-in;background:rgba(27,42,74,.06)}
+  .photos img.loading{width:180px;background:rgba(27,42,74,.08);animation:pulse 1.2s ease-in-out infinite alternate}
+  @keyframes pulse{from{opacity:.5}to{opacity:1}}
   .dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
   .dots span{width:6px;height:6px;border-radius:50%;background:rgba(27,42,74,.25)}
   .dots span.on{background:var(--ink)}
@@ -159,7 +161,7 @@ const CONFIG = {
   blurb:     "Women's & children's clothing. Bring what you've stopped wearing. Leave with what you'll start.",
   // Date, time, place and address live in the Google script and arrive only after the password.
   photosTitle: "Snagged at the swap",
-  photos:    ["01","02","03","04","05","06","07","08"].map(n=>`photos/${n}.svg?v=3`),  // bump v when photos change so phones don't show old copies
+  // Photos are private: they come from your Drive folder through the script, only after the password.
   api:       "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec"
 };
 /* ========================================================== */
@@ -171,7 +173,8 @@ const store = {
   set:(k,v)=>{try{localStorage.setItem("sns_"+k,v)}catch(e){}},
   del:k=>{try{localStorage.removeItem("sns_"+k)}catch(e){}}
 };
-let TITLE = store.get("title") || CONFIG.title, SHOW_PHOTOS = false;
+let TITLE = store.get("title") || CONFIG.title, SHOW_PHOTOS = false, PHOTO_IDS = [], BUILT = "";
+const PHOTO_SRC = {};
 let EV = {}, PW = store.get("pw") || "", ME = store.get("me") || "", GUESTS = [];
 
 /* ---------- API ---------- */
@@ -181,7 +184,7 @@ async function api(body){
     if (body.action === "meta") return {title: CONFIG.title};
     if (body.pw !== "demo") return {error:"bad_password"};
     if (body.action === "rsvp"){ const g = demoGuests.find(g=>g.name===body.name); if(g){ g.status = body.status; g.friend = body.status==="no" ? "" : (body.friend ?? g.friend ?? ""); } }
-    return {guests: demoGuests.map(g=>({...g})), title: CONFIG.title, showPhotos: true, event: {date:"2030-01-04", start:"18:00", end:"20:00", timeZone:"America/New_York", location:"Sample house", address:"1 Sample Lane, Anytown, NY 10000"}};
+    return {guests: demoGuests.map(g=>({...g})), title: CONFIG.title, showPhotos: false, photos: [], event: {date:"2030-01-04", start:"18:00", end:"20:00", timeZone:"America/New_York", location:"Sample house", address:"1 Sample Lane, Anytown, NY 10000"}};
   }
   const r = await fetch(CONFIG.api, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(body)});
   return r.json();
@@ -194,7 +197,7 @@ async function enter(pw){
   const res = await api({action:"list", pw});
   if (res.error) return false;
   PW = pw; store.set("pw", pw); GUESTS = res.guests; EV = res.event || {};
-  SHOW_PHOTOS = !!res.showPhotos; if (res.title) setTitle(res.title);
+  SHOW_PHOTOS = !!res.showPhotos; PHOTO_IDS = Array.isArray(res.photos) ? res.photos : []; if (res.title) setTitle(res.title);
   if (ME && !GUESTS.some(g=>g.name===ME)){ ME = ""; store.del("me"); }
   renderInvite(); window.scrollTo(0,0);
   return true;
@@ -306,19 +309,7 @@ function renderInvite(){
 
   $("#gcal").href = gcalLink();
 
-  $("#photoCard").classList.toggle("hidden", !(SHOW_PHOTOS && CONFIG.photos.length));
-  if (SHOW_PHOTOS && CONFIG.photos.length){
-    $("#photoCard").classList.remove("hidden");
-    $("#photos").innerHTML = "";
-    CONFIG.photos.forEach(src=>{ const i = new Image(); i.src = src; i.alt = ""; i.loading = "lazy"; i.onclick = ()=>{ $("#lightbox img").src = src; $("#lightbox").showModal(); }; $("#photos").appendChild(i); });
-    const dots = $("#dots"); dots.innerHTML = "";
-    CONFIG.photos.forEach(()=>dots.appendChild(document.createElement("span")));
-    const mark = () => { const box = $("#photos"), imgs = box.querySelectorAll("img"); if(!imgs.length) return;
-      let i = 0; imgs.forEach((im,k)=>{ if (im.offsetLeft - box.offsetLeft - 16 <= box.scrollLeft + 4) i = k; });
-      if (box.scrollLeft + box.clientWidth >= box.scrollWidth - 4) i = imgs.length - 1;
-      dots.querySelectorAll("span").forEach((d,k)=>d.classList.toggle("on",k===i)); };
-    $("#photos").onscroll = mark; $("#photos").querySelectorAll("img").forEach(im=>im.onload=mark); mark();
-  }
+  renderGallery();
 
   const groups = [["yes","Coming"],["maybe","Maybe"],["","Haven't replied"],["no","Next time"]];
   const box = $("#groups"); box.innerHTML = "";
@@ -335,6 +326,44 @@ function renderInvite(){
   show("invite");
 }
 $("#lightbox").onclick = () => $("#lightbox").close();
+
+/* ---------- Private photos ---------- */
+function renderGallery(){
+  const show = SHOW_PHOTOS && PHOTO_IDS.length > 0;
+  $("#photoCard").classList.toggle("hidden", !show);
+  if (!show) { BUILT = ""; return; }
+  const key = PHOTO_IDS.join(",");
+  if (key === BUILT) return;            // already showing these photos
+  BUILT = key;
+  const box = $("#photos"), dots = $("#dots");
+  box.innerHTML = ""; dots.innerHTML = "";
+  const imgs = PHOTO_IDS.map(id => {
+    const i = new Image(); i.alt = ""; i.className = "loading";
+    i.onclick = () => { if (i.src) { $("#lightbox img").src = i.src; $("#lightbox").showModal(); } };
+    i.onload = () => { i.classList.remove("loading"); mark(); };
+    box.appendChild(i); dots.appendChild(document.createElement("span"));
+    return [id, i];
+  });
+  const mark = () => { const all = box.querySelectorAll("img"); if (!all.length) return;
+    let n = 0; all.forEach((im,k)=>{ if (im.offsetLeft - box.offsetLeft - 16 <= box.scrollLeft + 4) n = k; });
+    if (box.scrollLeft + box.clientWidth >= box.scrollWidth - 4) n = all.length - 1;
+    dots.querySelectorAll("span").forEach((d,k)=>d.classList.toggle("on",k===n)); };
+  box.onscroll = mark; mark();
+  // Load a few at a time, in order, so the first photos appear quickly.
+  let next = 0;
+  const worker = async () => {
+    while (next < imgs.length && BUILT === key) {
+      const [id, img] = imgs[next++];
+      if (!PHOTO_SRC[id]) {
+        const r = await api({action:"photo", pw:PW, id}).catch(()=>null);
+        if (!r || r.error) { img.remove(); continue; }
+        PHOTO_SRC[id] = `data:${r.type};base64,${r.data}`;
+      }
+      img.src = PHOTO_SRC[id];
+    }
+  };
+  worker(); worker(); worker();
+}
 
 /* ---------- Calendar ---------- */
 const stamp = t => EV.date.replace(/-/g,"") + "T" + t.replace(":","") + "00";
