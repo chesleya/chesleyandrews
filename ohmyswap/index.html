@@ -33,7 +33,6 @@
   .masthead h1 .sip,#gate h1 .sip{display:inline;font-style:normal;font-size:1em;font-weight:400;letter-spacing:-.02em;margin:0}
   .pill{display:inline-block;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:7px 14px}
   .details{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px;font-size:17px;line-height:1.45}
-  .about{margin-top:28px;font-size:17px;line-height:1.6;white-space:pre-line}
   .details .label{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:700;margin-bottom:6px}
   .details a{color:inherit;text-decoration:none}
   @media (max-width:420px){.details{grid-template-columns:1fr}}
@@ -112,7 +111,6 @@
         <div><div class="label">When</div><div id="when"></div></div>
         <div><div class="label">Where</div><div id="loc"></div><a id="addr" target="_blank" rel="noopener"></a></div>
       </div>
-      <div class="about" id="about"></div>
     </header>
 
     <div class="card hidden" id="photoCard">
@@ -157,7 +155,6 @@ const CONFIG = {
   eyebrow:   "You're invited",
   place:     "",
   title:     "Sip & Swap",
-  about:     "Join us for an evening of sustainable style and the best vibes!\n\nBring any women’s and kids’ clothes, costumes & accessories you’re ready to part with and shop the swap. No rules on how much to bring or take, but we promise you’ll find something to love! Drinks and light bites served.\n\nWe’ll have straight-to-donate and textile recycling bins on site too. Leftovers go to the next swap, local organizations, and our caregivers.\n\nWe do this seasonally. Let us know if you’d ever like to host!",   // fallback; edit it on the host page
   blurb:     "Women's & children's clothing. Bring what you've stopped wearing. Leave with what you'll start.",
   // Date, time, place and address live in the Google script and arrive only after the password.
   photosTitle: "Snagged at the swap",
@@ -173,7 +170,7 @@ const store = {
   set:(k,v)=>{try{localStorage.setItem("sns_"+k,v)}catch(e){}},
   del:k=>{try{localStorage.removeItem("sns_"+k)}catch(e){}}
 };
-let TITLE = store.get("title") || CONFIG.title, SHOW_PHOTOS = false, ABOUT = CONFIG.about;
+let TITLE = store.get("title") || CONFIG.title, SHOW_PHOTOS = false;
 let EV = {}, PW = store.get("pw") || "", ME = store.get("me") || "", GUESTS = [];
 
 /* ---------- API ---------- */
@@ -196,7 +193,7 @@ async function enter(pw){
   const res = await api({action:"list", pw});
   if (res.error) return false;
   PW = pw; store.set("pw", pw); GUESTS = res.guests; EV = res.event || {};
-  SHOW_PHOTOS = !!res.showPhotos; if (res.title) setTitle(res.title); if (typeof res.about === "string") ABOUT = res.about;
+  SHOW_PHOTOS = !!res.showPhotos; if (res.title) setTitle(res.title);
   if (ME && !GUESTS.some(g=>g.name===ME)){ ME = ""; store.del("me"); }
   renderInvite(); window.scrollTo(0,0);
   return true;
@@ -293,7 +290,6 @@ function renderInvite(){
   fill();
   $("#when").textContent = fmtWhen(); $("#when").style.whiteSpace = "pre-line";
   $("#loc").textContent = EV.location || "";
-  $("#about").textContent = ABOUT || ""; $("#about").classList.toggle("hidden", !ABOUT);
   $("#addr").textContent = (EV.address || "").replace(/, (?=[^,]+, [A-Z]{2})/, ",\n");
   $("#addr").style.whiteSpace = "pre-line";
   $("#addr").href = "https://maps.google.com/?q=" + encodeURIComponent(EV.address || "");

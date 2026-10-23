@@ -95,8 +95,6 @@
       <input id="location" type="text" placeholder="Chesley's house">
       <label for="address">Address</label>
       <input id="address" type="text" placeholder="Street, Town, ST 00000">
-      <label for="about">Description <span class="hint">(shown under the details)</span></label>
-      <textarea id="about" style="min-height:220px"></textarea>
     </section>
 
     <section>
@@ -138,7 +136,6 @@
 const API = "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec";
 
 const $ = s => document.querySelector(s);
-const DEFAULT_ABOUT = "Join us for an evening of sustainable style and the best vibes!\n\nBring any women’s and kids’ clothes, costumes & accessories you’re ready to part with and shop the swap. No rules on how much to bring or take, but we promise you’ll find something to love! Drinks and light bites served.\n\nWe’ll have straight-to-donate and textile recycling bins on site too. Leftovers go to the next swap, local organizations, and our caregivers.\n\nWe do this seasonally. Let us know if you’d ever like to host!";
 const DEMO = !/^https:\/\/script\.google\.com\//.test(API);
 const store = {
   get:k=>{try{return localStorage.getItem("sns_"+k)}catch(e){return null}},
@@ -184,7 +181,7 @@ function load(res){
   S = res.settings;
   $("#date").value = S.event.date || ""; $("#start").value = S.event.start || ""; $("#end").value = S.event.end || "";
   $("#location").value = S.event.location || ""; $("#address").value = S.event.address || "";
-  $("#guests").value = S.guests.join("\n"); $("#guestPw").value = S.password || ""; $("#title").value = S.title || "Sip & Swap"; $("#about").value = (typeof S.about === "string") ? S.about : DEFAULT_ABOUT; $("#showPhotos").checked = !!S.showPhotos; 
+  $("#guests").value = S.guests.join("\n"); $("#guestPw").value = S.password || ""; $("#title").value = S.title || "Sip & Swap"; $("#showPhotos").checked = !!S.showPhotos; 
   countGuests(); renderReplies(res.replies); setDirty(false);
 }
 function ago(iso){
@@ -218,12 +215,12 @@ function countGuests(){ const n = guestList().length; $("#guestCount").textConte
 
 /* ---------- Edit + save ---------- */
 function setDirty(d){ DIRTY = d; $("#saveStatus").textContent = d ? "Unsaved changes" : "All saved"; $("#save").disabled = !d; $("#save").style.opacity = d ? 1 : .5; }
-["title","about","date","start","end","location","address","guests","guestPw","showPhotos"].forEach(id=>{
+["title","date","start","end","location","address","guests","guestPw","showPhotos"].forEach(id=>{
   $("#"+id).addEventListener("input", ()=>{ setDirty(true); if(id==="guests") countGuests(); });
   $("#"+id).addEventListener("change", ()=>setDirty(true));
 });
 $("#save").onclick = async () => {
-  const settings = { title:$("#title").value.trim() || "Sip & Swap", about:$("#about").value.trim(), showPhotos:$("#showPhotos").checked, password:$("#guestPw").value.trim(), guests:guestList(),
+  const settings = { title:$("#title").value.trim() || "Sip & Swap", showPhotos:$("#showPhotos").checked, password:$("#guestPw").value.trim(), guests:guestList(),
     event:{ date:$("#date").value, start:$("#start").value, end:$("#end").value, timeZone:(S.event.timeZone||"America/New_York"),
             location:$("#location").value.trim(), address:$("#address").value.trim() } };
   if (settings.password !== S.password && !confirm("Change the guest password? Anyone using the old one will be locked out until they get the new one.")) return;
