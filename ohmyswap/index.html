@@ -12,8 +12,8 @@
 <style>
   /* Matched to the invite graphic: blush, navy, tomato. Light only, like the paper. */
   :root{
-    --bg:#f7d9d1; --ink:#1f2a85; --muted:#5b5f93; --line:#1f2a85;
-    --accent:#d9412b; --accent-ink:#fff;
+    --bg:#c8312b; --ink:#fff4e2; --muted:#f6d4c4; --line:#fff4e2;
+    --accent:#f2b544; --accent-ink:#1b2a4a; --navy:#1b2a4a;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
@@ -50,16 +50,16 @@
   button,.btn{font:inherit;font-weight:600;cursor:pointer;border-radius:999px;padding:11px 20px;border:1px solid var(--ink);background:transparent;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center}
   .primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);margin-top:4px}
   .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-  .choice[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .choice[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
   #choices.arming{pointer-events:none}
   .cal{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:20px}
   .linkish{display:inline;background:none;border:none;border-radius:0;padding:0;color:var(--ink);text-decoration:none;font-weight:600;font-size:14px}
   .err{color:var(--accent);font-size:14px;min-height:1.4em;margin-top:8px}
   .photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -16px;padding:0 16px;scroll-padding:0 16px}
   .photos::-webkit-scrollbar{display:none}
-  .photos img{flex:0 0 auto;height:280px;width:auto;max-width:88vw;object-fit:cover;border-radius:8px;display:block;scroll-snap-align:start;cursor:zoom-in;background:rgba(31,42,133,.06)}
+  .photos img{flex:0 0 auto;height:280px;width:auto;max-width:88vw;object-fit:cover;border-radius:8px;display:block;scroll-snap-align:start;cursor:zoom-in;background:rgba(255,244,226,.08)}
   .dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
-  .dots span{width:6px;height:6px;border-radius:50%;background:rgba(31,42,133,.25)}
+  .dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,244,226,.35)}
   .dots span.on{background:var(--ink)}
   .group{margin-top:24px}
   .group .label{margin-bottom:6px}
@@ -67,7 +67,7 @@
   .chip{padding:4px 0}
   .chip.me{font-weight:inherit}
   #matches{margin-top:6px;border-radius:8px;overflow:hidden}
-  #matches button{display:block;width:100%;text-align:left;border:none;border-radius:0;border-bottom:1px solid rgba(31,42,133,.15);background:#fdf3f0;padding:13px 14px;font-weight:500}
+  #matches button{display:block;width:100%;text-align:left;border:none;border-radius:0;border-bottom:1px solid rgba(27,42,74,.12);background:var(--ink);color:var(--navy);padding:13px 14px;font-weight:500}
   #matches button:last-child{border-bottom:none}
   #matches .none{font-size:14px;color:var(--muted);padding:8px 2px}
   .hidden{display:none!important}
@@ -158,7 +158,7 @@ const CONFIG = {
   blurb:     "Women's & children's clothing. Bring what you've stopped wearing. Leave with what you'll start.",
   // Date, time, place and address live in the Google script and arrive only after the password.
   photosTitle: "Snagged at the swap",
-  photos:    ["01","02","03","04","05","06","07","08"].map(n=>`photos/${n}.svg?v=2`),  // bump v when photos change so phones don't show old copies
+  photos:    ["01","02","03","04","05","06","07","08"].map(n=>`photos/${n}.svg?v=3`),  // bump v when photos change so phones don't show old copies
   api:       "https://script.google.com/macros/s/AKfycbynn-BS2PBlOKkPP1lHHlGK5c565JmP9rseB78u1pRWhaQeFmWtCjkVi7WTx6YP70xC/exec"
 };
 /* ========================================================== */
