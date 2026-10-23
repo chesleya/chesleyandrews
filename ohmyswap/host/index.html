@@ -83,6 +83,8 @@
 
     <section>
       <h2>Details</h2>
+      <label for="title">Title</label>
+      <input id="title" type="text" maxlength="60" placeholder="Sip & Swap">
       <label for="date">Date</label>
       <input id="date" type="date">
       <div class="two">
@@ -107,6 +109,11 @@
       <label for="guestPw">What guests type to get in</label>
       <input id="guestPw" type="text" autocomplete="off" autocapitalize="none" spellcheck="false">
       <p class="sub" style="font-size:14px;margin-top:8px">Changing it locks out anyone using the old one, including guests who already have the page open.</p>
+    </section>
+
+    <section>
+      <h2>Photos</h2>
+      <label class="toggle"><input type="checkbox" id="showPhotos"> Show the photo slideshow on the invite</label>
     </section>
 
     <section>
@@ -138,7 +145,7 @@ const store = {
 let HOST = store.get("host") || "", S = null, DIRTY = false;
 
 /* ---------- API ---------- */
-const demo = { settings:{password:"sample-pass",event:{date:"2030-01-04",start:"18:00",end:"20:00",timeZone:"America/New_York",location:"Sample house",address:"1 Sample Lane, Anytown, NY 10000"},guests:["Ann Lee","Bo Diaz","Cara Fox","Dee Moss","Eve Hart"]},
+const demo = { settings:{title:"Sip & Swap",showPhotos:false,password:"sample-pass",event:{date:"2030-01-04",start:"18:00",end:"20:00",timeZone:"America/New_York",location:"Sample house",address:"1 Sample Lane, Anytown, NY 10000"},guests:["Ann Lee","Bo Diaz","Cara Fox","Dee Moss","Eve Hart"]},
   rsvps:{"Ann Lee":{status:"yes",at:new Date(Date.now()-3600e3).toISOString()},"Bo Diaz":{status:"maybe",at:new Date(Date.now()-86400e3*2).toISOString()},"Dee Moss":{status:"no",at:new Date(Date.now()-600e3).toISOString()}} };
 async function api(body){
   if (DEMO){
@@ -174,7 +181,7 @@ function load(res){
   S = res.settings;
   $("#date").value = S.event.date || ""; $("#start").value = S.event.start || ""; $("#end").value = S.event.end || "";
   $("#location").value = S.event.location || ""; $("#address").value = S.event.address || "";
-  $("#guests").value = S.guests.join("\n"); $("#guestPw").value = S.password || ""; 
+  $("#guests").value = S.guests.join("\n"); $("#guestPw").value = S.password || ""; $("#title").value = S.title || "Sip & Swap"; $("#showPhotos").checked = !!S.showPhotos; 
   countGuests(); renderReplies(res.replies); setDirty(false);
 }
 function ago(iso){
@@ -208,12 +215,12 @@ function countGuests(){ const n = guestList().length; $("#guestCount").textConte
 
 /* ---------- Edit + save ---------- */
 function setDirty(d){ DIRTY = d; $("#saveStatus").textContent = d ? "Unsaved changes" : "All saved"; $("#save").disabled = !d; $("#save").style.opacity = d ? 1 : .5; }
-["date","start","end","location","address","guests","guestPw"].forEach(id=>{
+["title","date","start","end","location","address","guests","guestPw","showPhotos"].forEach(id=>{
   $("#"+id).addEventListener("input", ()=>{ setDirty(true); if(id==="guests") countGuests(); });
   $("#"+id).addEventListener("change", ()=>setDirty(true));
 });
 $("#save").onclick = async () => {
-  const settings = { password:$("#guestPw").value.trim(), guests:guestList(),
+  const settings = { title:$("#title").value.trim() || "Sip & Swap", showPhotos:$("#showPhotos").checked, password:$("#guestPw").value.trim(), guests:guestList(),
     event:{ date:$("#date").value, start:$("#start").value, end:$("#end").value, timeZone:(S.event.timeZone||"America/New_York"),
             location:$("#location").value.trim(), address:$("#address").value.trim() } };
   if (settings.password !== S.password && !confirm("Change the guest password? Anyone using the old one will be locked out until they get the new one.")) return;
