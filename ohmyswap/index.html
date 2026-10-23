@@ -136,7 +136,6 @@
         <a class="btn" id="gcal" target="_blank" rel="noopener">Add to Google Calendar</a>
         <button class="linkish" id="ics">or Apple Calendar</button>
       </div>
-      <p class="note muted" id="notListed">Not on the list? Reply to the email and we'll sort it out.</p>
     </div>
 
     <div class="card">
@@ -298,7 +297,6 @@ function renderInvite(){
   $("#greet").textContent = "RSVP";
   $("#me2").textContent = first;
   $("#pickWrap").classList.toggle("hidden", !!ME);
-  $("#notListed").classList.toggle("hidden", !!ME);
   $("#notMeLine").classList.toggle("hidden", !ME);
   if (!ME) fillNames();
 
