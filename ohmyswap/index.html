@@ -337,6 +337,7 @@ function renderGallery(){
   BUILT = key;
   const box = $("#photos"), dots = $("#dots");
   box.innerHTML = ""; dots.innerHTML = "";
+  dots.classList.toggle("hidden", PHOTO_IDS.length < 2);
   const imgs = PHOTO_IDS.map(id => {
     const i = new Image(); i.alt = ""; i.className = "loading";
     i.onclick = () => { if (i.src) { $("#lightbox img").src = i.src; $("#lightbox").showModal(); } };
@@ -356,7 +357,7 @@ function renderGallery(){
       const [id, img] = imgs[next++];
       if (!PHOTO_SRC[id]) {
         const r = await api({action:"photo", pw:PW, id}).catch(()=>null);
-        if (!r || r.error) { img.remove(); continue; }
+        if (!r || r.error) { img.remove(); dots.lastChild && dots.lastChild.remove(); dots.classList.toggle("hidden", box.querySelectorAll("img").length < 2); continue; }
         PHOTO_SRC[id] = `data:${r.type};base64,${r.data}`;
       }
       img.src = PHOTO_SRC[id];
